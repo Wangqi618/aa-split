@@ -557,8 +557,6 @@ async function rejoinLast(){
   await enter(code,name);
 }
 
-// 覆盖enter，加入存session逻辑
-const _origEnter=enter;
 async function enter(code,name){
   S.roomId=code;S.myName=name;
   await sb.from('members').insert({room_id:code,name}).catch(()=>{});

@@ -1,0 +1,880 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>今晚谁欠谁💸</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&family=Noto+Sans+SC:wght@300;400;500;700&display=swap');
+
+  :root {
+    --bg: #0d0d0d;
+    --card: #181818;
+    --card2: #1f1f1f;
+    --accent: #f0e040;
+    --accent2: #ff6b35;
+    --text: #f0ece0;
+    --muted: #555;
+    --border: #272727;
+    --green: #4ade80;
+    --radius: 16px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Noto Sans SC', sans-serif;
+    min-height: 100vh;
+    padding: 0 0 100px;
+    overflow-x: hidden;
+  }
+
+  .header {
+    padding: 32px 20px 16px;
+    position: relative;
+  }
+  .header-label {
+    font-family: 'Syne', sans-serif;
+    font-size: 10px; letter-spacing: 3px;
+    color: var(--muted); text-transform: uppercase; margin-bottom: 6px;
+  }
+  .header-title {
+    font-family: 'Syne', sans-serif;
+    font-size: 34px; font-weight: 800; line-height: 1.05;
+  }
+  .header-title em { color: var(--accent); font-style: normal; }
+  .header-sub { font-size: 13px; color: var(--muted); margin-top: 6px; }
+  .header-deco {
+    position: absolute; top: 24px; right: 20px;
+    font-size: 52px; opacity: 0.12;
+    animation: float 3s ease-in-out infinite;
+  }
+  @keyframes float { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-8px)} }
+
+  .page { display: none; }
+  .page.active { display: block; }
+
+  .section { padding: 0 16px; margin-bottom: 14px; }
+  .section-title {
+    font-family: 'Syne', sans-serif;
+    font-size: 10px; letter-spacing: 2.5px;
+    color: var(--muted); text-transform: uppercase;
+    margin-bottom: 10px; padding-left: 2px;
+    display: flex; align-items: center; gap: 8px;
+  }
+
+  .input-field {
+    background: var(--card);
+    border: 1.5px solid var(--border);
+    border-radius: 12px;
+    padding: 12px 14px;
+    color: var(--text);
+    font-size: 15px;
+    font-family: 'Noto Sans SC', sans-serif;
+    outline: none;
+    transition: border-color 0.2s;
+    width: 100%;
+  }
+  .input-field:focus { border-color: var(--accent); }
+  .input-field::placeholder { color: var(--muted); }
+  input[type=number]::-webkit-inner-spin-button,
+  input[type=number]::-webkit-outer-spin-button { -webkit-appearance:none; }
+  input[type=number] { -moz-appearance:textfield; }
+
+  .btn {
+    background: var(--accent); border: none;
+    border-radius: 12px; padding: 13px 18px;
+    color: #000; font-size: 15px; font-weight: 700;
+    cursor: pointer; transition: all 0.15s;
+    font-family: 'Syne', sans-serif; white-space: nowrap;
+  }
+  .btn:active { transform: scale(0.96); }
+  .btn.secondary {
+    background: var(--card2); color: var(--text);
+    border: 1.5px solid var(--border);
+  }
+  .btn.full { width: 100%; padding: 16px; font-size: 16px; border-radius: var(--radius); }
+  .btn.green { background: var(--green); }
+
+  /* LANDING */
+  .landing-card {
+    background: var(--card); border: 1.5px solid var(--border);
+    border-radius: var(--radius); padding: 20px;
+    margin-bottom: 12px;
+  }
+  .landing-card h3 {
+    font-family: 'Syne', sans-serif; font-size: 14px;
+    font-weight: 700; margin-bottom: 12px; color: var(--accent);
+  }
+  .or-divider {
+    text-align: center; color: var(--muted);
+    font-size: 13px; margin: 16px 0;
+    position: relative;
+  }
+  .or-divider::before, .or-divider::after {
+    content:''; position:absolute; top:50%;
+    width: 40%; height: 1px; background: var(--border);
+  }
+  .or-divider::before { left: 0; }
+  .or-divider::after { right: 0; }
+
+  /* ROOM HEADER */
+  .room-bar {
+    background: var(--card2); border-bottom: 1px solid var(--border);
+    padding: 10px 16px;
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 4px;
+  }
+  .room-code {
+    font-family: 'Syne', sans-serif; font-size: 13px;
+    color: var(--accent); font-weight: 700; letter-spacing: 2px;
+  }
+  .room-user {
+    font-size: 13px; color: var(--muted);
+  }
+  .copy-btn {
+    font-size: 12px; color: var(--accent2);
+    background: none; border: none; cursor: pointer;
+    font-family: 'Noto Sans SC', sans-serif;
+    padding: 4px 8px;
+  }
+
+  /* MEMBERS */
+  .members-row {
+    display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 10px;
+  }
+  .member-chip {
+    display: flex; align-items: center; gap: 5px;
+    background: var(--card); border: 1.5px solid var(--border);
+    border-radius: 100px; padding: 5px 10px 5px 8px;
+    font-size: 13px;
+    animation: popIn 0.25s cubic-bezier(.34,1.56,.64,1);
+  }
+  .member-chip.me {
+    border-color: var(--accent);
+    background: rgba(240,224,64,0.06);
+  }
+  .avatar {
+    width: 20px; height: 20px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 11px; font-weight: 700; flex-shrink: 0;
+  }
+  @keyframes popIn {
+    from { opacity:0; transform:scale(0.88) translateY(6px); }
+    to   { opacity:1; transform:scale(1) translateY(0); }
+  }
+
+  /* ITEM CARD */
+  .item-card {
+    background: var(--card); border: 1.5px solid var(--border);
+    border-radius: var(--radius); padding: 14px;
+    margin-bottom: 10px; position: relative;
+    animation: popIn 0.25s cubic-bezier(.34,1.56,.64,1);
+  }
+  .item-card.mine { border-color: rgba(240,224,64,0.3); }
+  .item-who {
+    font-size: 10px; color: var(--muted);
+    margin-bottom: 8px; letter-spacing: 1px;
+  }
+  .item-who span { color: var(--accent2); font-weight: 600; }
+  .item-header {
+    display: flex; gap: 10px; margin-bottom: 12px; align-items: flex-end;
+  }
+  .field-group { display: flex; flex-direction: column; gap: 5px; }
+  .field-label { font-size: 10px; color: var(--muted); letter-spacing: 1px; }
+  .price-wrap { position: relative; }
+  .price-prefix {
+    position: absolute; left: 12px; top: 50%;
+    transform: translateY(-50%); color: var(--muted); font-size: 14px;
+    pointer-events: none;
+  }
+  .price-wrap .input-field { padding-left: 24px; width: 96px; }
+  .item-rm {
+    position: absolute; top: 10px; right: 10px;
+    background: none; border: none; color: var(--muted);
+    font-size: 20px; cursor: pointer; line-height: 1; padding: 4px;
+  }
+  .pill-row { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 6px; }
+  .pill-label {
+    font-size: 11px; color: var(--muted);
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .all-btn {
+    font-size: 11px; color: var(--accent2);
+    background: none; border: none; cursor: pointer;
+    font-family: 'Noto Sans SC', sans-serif;
+  }
+  .p-pill {
+    padding: 5px 11px; border-radius: 100px;
+    border: 1.5px solid var(--border);
+    font-size: 13px; cursor: pointer;
+    display: flex; align-items: center; gap: 4px;
+    background: var(--card2); color: var(--muted);
+    user-select: none; transition: all 0.12s;
+  }
+  .p-pill.active {
+    border-color: var(--accent); color: var(--accent);
+    background: rgba(240,224,64,0.08);
+  }
+  .p-pill .dot {
+    width: 6px; height: 6px; border-radius: 50%;
+    background: var(--border); transition: background 0.12s; flex-shrink:0;
+  }
+  .p-pill.active .dot { background: var(--accent); }
+  .payer-pill {
+    padding: 5px 11px; border-radius: 100px;
+    border: 1.5px solid var(--border);
+    font-size: 13px; cursor: pointer;
+    display: flex; align-items: center; gap: 4px;
+    background: var(--card2); color: var(--muted);
+    user-select: none; transition: all 0.12s;
+  }
+  .payer-pill.active {
+    border-color: var(--accent2); color: var(--accent2);
+    background: rgba(255,107,53,0.08);
+  }
+  .payer-pill .dot {
+    width: 6px; height: 6px; border-radius: 50%;
+    background: var(--border); transition: background 0.12s; flex-shrink:0;
+  }
+  .payer-pill.active .dot { background: var(--accent2); }
+
+  .divider { height: 1px; background: var(--border); margin: 10px 0; }
+
+  /* RESULT */
+  .result-card {
+    background: var(--card); border: 1.5px solid var(--border);
+    border-radius: var(--radius); overflow: hidden;
+    margin-bottom: 12px;
+    animation: popIn 0.3s cubic-bezier(.34,1.56,.64,1);
+  }
+  .result-head {
+    background: var(--accent); padding: 14px 18px;
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .result-head-title { font-family:'Syne',sans-serif; font-size:15px; font-weight:800; color:#000; }
+  .result-total { font-family:'Syne',sans-serif; font-size:22px; font-weight:800; color:#000; }
+  .result-body { padding: 4px 18px 8px; }
+  .result-row {
+    padding: 11px 0; border-bottom: 1px solid var(--border);
+  }
+  .result-row:last-child { border-bottom: none; }
+  .result-row-top {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 6px;
+  }
+  .result-left { display: flex; align-items: center; gap: 10px; }
+  .result-avatar { width:30px; height:30px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:13px; font-weight:700; }
+  .result-name { font-size:15px; font-weight:500; }
+  .result-amt { font-family:'Syne',sans-serif; font-size:18px; font-weight:700; }
+  .result-breakdown {
+    padding-left: 40px;
+    display: flex; flex-wrap: wrap; gap: 6px;
+  }
+  .breakdown-item {
+    font-size: 11px; color: var(--muted);
+    background: var(--card2); border-radius: 6px;
+    padding: 3px 8px;
+  }
+
+  .transfer-card {
+    background: var(--card); border: 1.5px solid var(--border);
+    border-radius: var(--radius); padding: 14px 18px;
+    margin-bottom: 12px;
+    animation: popIn 0.3s cubic-bezier(.34,1.56,.64,1);
+  }
+  .transfer-title {
+    font-family:'Syne',sans-serif; font-size:10px;
+    letter-spacing:2px; color:var(--muted);
+    text-transform:uppercase; margin-bottom:10px;
+  }
+  .transfer-row {
+    display: flex; align-items: center; gap: 8px;
+    padding: 9px 12px; background: var(--card2);
+    border-radius: 10px; margin-bottom: 6px; font-size:14px;
+  }
+  .t-arrow { color: var(--accent2); font-size:15px; flex-shrink:0; }
+  .t-amt { margin-left:auto; font-family:'Syne',sans-serif; font-weight:700; color:var(--accent); }
+
+  .shot-card {
+    background: #111; border: 1.5px solid var(--accent);
+    border-radius: var(--radius); overflow: hidden;
+  }
+  .shot-top {
+    background: #000; padding: 12px 16px;
+    display: flex; justify-content: space-between; align-items: center;
+    border-bottom: 1px solid var(--border);
+  }
+  .shot-top-l { font-size:12px; color:var(--muted); }
+  .shot-top-r { font-family:'Syne',sans-serif; font-size:13px; color:var(--accent); font-weight:700; }
+  .shot-body { padding: 12px 16px; }
+  .shot-row {
+    display: flex; justify-content: space-between;
+    font-size:13px; padding: 4px 0; color: var(--muted);
+  }
+  .shot-row.hi { color: var(--text); font-weight:500; }
+  .shot-row.tx { color: var(--accent); }
+  .shot-foot {
+    background: var(--accent); padding: 11px 16px;
+    text-align: center; font-size:11px; color:#000;
+    font-weight:700; letter-spacing:1.5px;
+    font-family:'Syne',sans-serif;
+  }
+
+  .empty { text-align:center; padding:28px 20px; color:var(--muted); font-size:14px; }
+  .empty-icon { font-size:34px; margin-bottom:8px; }
+
+  .toast {
+    position: fixed; bottom:24px; left:50%;
+    transform: translateX(-50%) translateY(80px);
+    background: var(--text); color:#000;
+    padding: 11px 22px; border-radius:100px;
+    font-size:14px; font-weight:600;
+    transition: transform 0.3s cubic-bezier(.34,1.56,.64,1);
+    z-index:999; white-space:nowrap; pointer-events:none;
+  }
+  .toast.show { transform: translateX(-50%) translateY(0); }
+
+  .bottom-actions {
+    position: fixed; bottom:0; left:0; right:0;
+    padding: 12px 16px 16px;
+    background: linear-gradient(transparent, var(--bg) 50%);
+    display: flex; gap: 10px;
+  }
+
+  .live-dot {
+    width: 7px; height: 7px; border-radius: 50%;
+    background: var(--green); display: inline-block;
+    margin-right: 4px;
+    animation: pulse 2s infinite;
+  }
+  @keyframes pulse {
+    0%,100% { opacity: 1; }
+    50% { opacity: 0.3; }
+  }
+
+  .add-row { display: flex; gap: 8px; }
+  .count-badge {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 18px; height: 18px; border-radius: 50%;
+    background: var(--accent2); color: #fff;
+    font-size: 10px; font-weight: 700;
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-label">AA 分账</div>
+  <div class="header-title">今晚<em>谁欠谁</em></div>
+  <div class="header-sub">聚餐 · 奶茶 · 任何饭局</div>
+  <div class="header-deco">💸</div>
+</div>
+
+<!-- PAGE: 落地页 -->
+<div class="page active" id="page-landing">
+  <div class="section">
+    <div class="landing-card">
+      <h3>🍽️ 发起一个新账单</h3>
+      <div class="field-group" style="margin-bottom:10px">
+        <div class="field-label">你的名字</div>
+        <input class="input-field" id="create-name" placeholder="输入你的名字或代号…" maxlength="8">
+      </div>
+      <button class="btn full" onclick="createRoom()">建房间 · 生成分享链接</button>
+    </div>
+
+    <div class="or-divider">或者</div>
+
+    <div class="landing-card">
+      <h3>🔗 加入已有账单</h3>
+      <div class="field-group" style="margin-bottom:10px">
+        <div class="field-label">你的名字</div>
+        <input class="input-field" id="join-name" placeholder="输入你的名字或代号…" maxlength="8">
+      </div>
+      <div class="field-group" style="margin-bottom:10px">
+        <div class="field-label">房间码</div>
+        <input class="input-field" id="join-code" placeholder="6位房间码…" maxlength="6" style="text-transform:uppercase">
+      </div>
+      <button class="btn secondary full" onclick="joinRoom()">加入房间</button>
+    </div>
+  </div>
+</div>
+
+<!-- PAGE: 房间主页 -->
+<div class="page" id="page-room">
+  <div class="room-bar">
+    <div>
+      <span class="live-dot"></span>
+      <span class="room-code" id="room-code-display"></span>
+    </div>
+    <div style="display:flex;align-items:center;gap:8px">
+      <span class="room-user" id="room-user-display"></span>
+      <button class="copy-btn" onclick="copyLink()">复制链接</button>
+    </div>
+  </div>
+
+  <div class="section" style="margin-top:10px">
+    <div class="section-title">在场的人 <span id="members-badge"></span></div>
+    <div class="members-row" id="members-list"></div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">账单明细 <span id="items-badge"></span></div>
+    <div id="items-list"></div>
+    <button class="btn secondary full" onclick="addItem()">＋ 加一笔</button>
+  </div>
+
+  <div class="section" id="result-section" style="display:none">
+    <div class="divider"></div>
+    <div class="section-title">结算结果</div>
+    <div id="result-area"></div>
+  </div>
+
+  <div class="bottom-actions">
+    <button class="btn secondary" onclick="leaveRoom()">退出</button>
+    <button class="btn full" onclick="calculate()" style="flex:1">🧮 结算</button>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const SUPABASE_URL = 'https://xrleopqmfeebgnltcjew.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhybGVvcHFtZmVlYmdubHRjamV3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc5NzMzNzgsImV4cCI6MjA5MzU0OTM3OH0.jQnyfBJ0hdBb5YV8jm1ANwthTie2I6Hk8MqyPzjI01k';
+const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+const COLORS = ['#f0e040','#ff6b35','#4ade80','#60a5fa','#f472b6','#a78bfa','#fb923c','#34d399'];
+const getColor = i => COLORS[i % COLORS.length];
+const getInit  = n => n ? n.slice(0,1).toUpperCase() : '?';
+
+let state = {
+  roomId: null,
+  myName: null,
+  members: [],
+  items: [],
+  channel: null,
+};
+
+// ── TOAST ──
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2200);
+}
+
+// ── PAGE ──
+function showPage(id) {
+  document.querySelectorAll('.page').forEach(p => p.classList.toggle('active', p.id === id));
+  window.scrollTo(0,0);
+}
+
+// ── GENERATE ROOM CODE ──
+function genCode() {
+  return Math.random().toString(36).substring(2,8).toUpperCase();
+}
+
+// ── CHECK URL FOR ROOM CODE ──
+function getRoomFromURL() {
+  const params = new URLSearchParams(window.location.search);
+  return params.get('room');
+}
+
+// ── CREATE ROOM ──
+async function createRoom() {
+  const name = document.getElementById('create-name').value.trim();
+  if (!name) { showToast('请输入你的名字'); return; }
+
+  const code = genCode();
+  const { error } = await sb.from('rooms').insert({ id: code });
+  if (error) { showToast('创建失败，请重试'); console.error(error); return; }
+
+  await enterRoom(code, name);
+}
+
+// ── JOIN ROOM ──
+async function joinRoom() {
+  const name = document.getElementById('join-name').value.trim();
+  const code = document.getElementById('join-code').value.trim().toUpperCase();
+  if (!name) { showToast('请输入你的名字'); return; }
+  if (!code || code.length !== 6) { showToast('请输入6位房间码'); return; }
+
+  const { data, error } = await sb.from('rooms').select('id').eq('id', code).single();
+  if (error || !data) { showToast('房间不存在，检查一下码'); return; }
+
+  await enterRoom(code, name);
+}
+
+// ── ENTER ROOM ──
+async function enterRoom(code, name) {
+  state.roomId = code;
+  state.myName = name;
+
+  // add member (ignore duplicate)
+  await sb.from('members').upsert({ room_id: code, name }, { onConflict: 'room_id,name', ignoreDuplicates: true });
+
+  // load existing data
+  await loadMembers();
+  await loadItems();
+
+  // update URL
+  const url = new URL(window.location.href);
+  url.searchParams.set('room', code);
+  window.history.replaceState({}, '', url);
+
+  // setup realtime
+  setupRealtime();
+
+  // show room page
+  document.getElementById('room-code-display').textContent = code;
+  document.getElementById('room-user-display').textContent = name;
+  showPage('page-room');
+}
+
+// ── LOAD DATA ──
+async function loadMembers() {
+  const { data } = await sb.from('members').select('name').eq('room_id', state.roomId).order('joined_at');
+  state.members = data ? data.map(m => m.name) : [];
+  renderMembers();
+}
+
+async function loadItems() {
+  const { data } = await sb.from('items').select('*').eq('room_id', state.roomId).order('created_at');
+  state.items = data || [];
+  renderItems();
+}
+
+// ── REALTIME ──
+function setupRealtime() {
+  if (state.channel) sb.removeChannel(state.channel);
+  state.channel = sb.channel('room-' + state.roomId)
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'members', filter: `room_id=eq.${state.roomId}` },
+      () => loadMembers())
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'items', filter: `room_id=eq.${state.roomId}` },
+      () => loadItems())
+    .subscribe();
+}
+
+// ── RENDER MEMBERS ──
+function renderMembers() {
+  const el = document.getElementById('members-list');
+  el.innerHTML = state.members.map((m, i) => `
+    <div class="member-chip ${m === state.myName ? 'me' : ''}">
+      <div class="avatar" style="background:${getColor(i)}22;color:${getColor(i)}">${getInit(m)}</div>
+      <span>${m}${m === state.myName ? ' (我)' : ''}</span>
+    </div>`).join('');
+  const b = document.getElementById('members-badge');
+  b.innerHTML = state.members.length ? `<span class="count-badge">${state.members.length}</span>` : '';
+}
+
+// ── ADD ITEM ──
+async function addItem() {
+  if (state.members.length < 2) { showToast('等更多人加入再记账'); return; }
+  // insert a new item with defaults
+  const { data, error } = await sb.from('items').insert({
+    room_id: state.roomId,
+    name: '',
+    price: 0,
+    payer: state.myName,
+    participants: [...state.members],
+  }).select().single();
+  if (error) { showToast('添加失败'); console.error(error); return; }
+  // local update will come via realtime, but also add locally for instant feedback
+  state.items.push(data);
+  renderItems();
+  setTimeout(() => {
+    const fs = document.querySelectorAll('.item-name-field');
+    if (fs.length) fs[fs.length-1].focus();
+  }, 60);
+}
+
+// ── UPDATE ITEM IN DB (debounced) ──
+const debounceTimers = {};
+function debouncedSave(id) {
+  clearTimeout(debounceTimers[id]);
+  debounceTimers[id] = setTimeout(() => saveItem(id), 600);
+}
+
+async function saveItem(id) {
+  const item = state.items.find(i => i.id === id);
+  if (!item) return;
+  await sb.from('items').update({
+    name: item.name,
+    price: parseFloat(item.price) || 0,
+    payer: item.payer,
+    participants: item.participants,
+  }).eq('id', id);
+}
+
+async function deleteItem(id) {
+  state.items = state.items.filter(i => i.id !== id);
+  renderItems();
+  await sb.from('items').delete().eq('id', id);
+}
+
+// ── LOCAL ITEM MUTATIONS ──
+function updateName(id, v) {
+  const it = state.items.find(i => i.id === id); if(!it) return;
+  it.name = v; debouncedSave(id);
+}
+function updatePrice(id, v) {
+  const it = state.items.find(i => i.id === id); if(!it) return;
+  it.price = v; debouncedSave(id);
+}
+function toggleParticipant(id, name) {
+  const it = state.items.find(i => i.id === id); if(!it) return;
+  const idx = it.participants.indexOf(name);
+  if (idx >= 0) {
+    if (it.participants.length === 1) { showToast('至少留一个人'); return; }
+    it.participants.splice(idx, 1);
+    if (it.payer === name) it.payer = 'each';
+  } else {
+    it.participants.push(name);
+  }
+  rerenderPills(id); debouncedSave(id);
+}
+function selectAllP(id) {
+  const it = state.items.find(i => i.id === id); if(!it) return;
+  it.participants = [...state.members];
+  rerenderPills(id); debouncedSave(id);
+}
+function selectPayer(id, name) {
+  const it = state.items.find(i => i.id === id); if(!it) return;
+  it.payer = (it.payer === name) ? 'each' : name;
+  rerenderPayerPills(id); debouncedSave(id);
+}
+
+function rerenderPills(id) {
+  const it = state.items.find(i => i.id === id); if(!it) return;
+  const el = document.querySelector(`[data-eater="${id}"]`); if(!el) return;
+  el.innerHTML = state.members.map(p => `
+    <div class="p-pill ${it.participants.includes(p)?'active':''}" onclick="toggleParticipant('${id}','${p}')">
+      <div class="dot"></div>${p}</div>`).join('');
+  rerenderPayerPills(id);
+}
+function rerenderPayerPills(id) {
+  const it = state.items.find(i => i.id === id); if(!it) return;
+  const el = document.querySelector(`[data-payer="${id}"]`); if(!el) return;
+  const candidates = it.participants.length > 0 ? it.participants : state.members;
+  el.innerHTML = `<div class="payer-pill ${it.payer==='each'?'active':''}" onclick="selectPayer('${id}','each')">
+    <div class="dot"></div>各自付</div>` +
+    candidates.map(p => `<div class="payer-pill ${it.payer===p?'active':''}" onclick="selectPayer('${id}','${p}')">
+      <div class="dot"></div>${p}</div>`).join('');
+}
+
+// ── RENDER ITEMS ──
+function renderItems() {
+  const el = document.getElementById('items-list');
+  const b  = document.getElementById('items-badge');
+  b.innerHTML = state.items.length ? `<span class="count-badge">${state.items.length}</span>` : '';
+
+  if (state.items.length === 0) {
+    el.innerHTML = `<div class="empty"><div class="empty-icon">🍽️</div>还没有人记账</div>`;
+    return;
+  }
+
+  el.innerHTML = state.items.map(it => {
+    const isMine = it.payer === state.myName || it.name === '';
+    return `<div class="item-card ${isMine?'mine':''}">
+      ${isMine ? `<button class="item-rm" onclick="deleteItem('${it.id}')">×</button>` : ''}
+      <div class="item-who">由 <span>${it.payer === 'each' ? '大家' : it.payer}</span> 付款</div>
+      <div class="item-header">
+        <div class="field-group" style="flex:1">
+          <div class="field-label">菜名 / 饮料</div>
+          <input class="input-field item-name-field" placeholder="奶茶、烤鱼…"
+            value="${it.name||''}"
+            ${isMine ? `oninput="updateName('${it.id}',this.value)"` : 'readonly style="opacity:0.6"'}
+            style="padding-right:${isMine?'32px':'14px'}">
+        </div>
+        <div class="field-group">
+          <div class="field-label">价格</div>
+          <div class="price-wrap">
+            <span class="price-prefix">¥</span>
+            <input class="input-field" type="number" placeholder="0" min="0" step="0.01"
+              value="${it.price||''}"
+              ${isMine ? `oninput="updatePrice('${it.id}',this.value)"` : 'readonly style="opacity:0.6"'}>
+          </div>
+        </div>
+      </div>
+      <div class="pill-label">谁吃/喝？
+        ${isMine ? `<button class="all-btn" onclick="selectAllP('${it.id}')">全选</button>` : ''}
+      </div>
+      <div class="pill-row" data-eater="${it.id}">
+        ${state.members.map(p => `
+          <div class="p-pill ${it.participants.includes(p)?'active':''}"
+            ${isMine ? `onclick="toggleParticipant('${it.id}','${p}')"` : ''}>
+            <div class="dot"></div>${p}</div>`).join('')}
+      </div>
+      ${isMine ? `
+        <div class="divider" style="margin:10px 0 8px"></div>
+        <div class="pill-label" style="margin-bottom:6px">谁付了这笔？</div>
+        <div class="pill-row" data-payer="${it.id}">
+          <div class="payer-pill ${it.payer==='each'?'active':''}" onclick="selectPayer('${it.id}','each')">
+            <div class="dot"></div>各自付</div>
+          ${(it.participants.length>0?it.participants:state.members).map(p =>
+            `<div class="payer-pill ${it.payer===p?'active':''}" onclick="selectPayer('${it.id}','${p}')">
+              <div class="dot"></div>${p}</div>`).join('')}
+        </div>` : ''}
+    </div>`;
+  }).join('');
+}
+
+// ── CALCULATE ──
+function calculate() {
+  const validItems = state.items.filter(it => it.name && parseFloat(it.price) > 0);
+  if (validItems.length === 0) { showToast('还没有完整的账单记录'); return; }
+
+  let net = {}, shares = {};
+  state.members.forEach(p => { net[p] = 0; shares[p] = 0; });
+
+  // per-person breakdown: itemName → amount
+  let breakdown = {};
+  state.members.forEach(p => breakdown[p] = []);
+
+  let total = 0;
+
+  validItems.forEach(it => {
+    const price = parseFloat(it.price);
+    const eaters = it.participants.length > 0 ? it.participants : state.members;
+    const share  = price / eaters.length;
+    total += price;
+
+    eaters.forEach(p => {
+      net[p]    -= share;
+      shares[p] += share;
+      breakdown[p].push({ name: it.name||'未命名', amt: share });
+    });
+
+    if (it.payer === 'each') {
+      eaters.forEach(p => net[p] += share);
+    } else if (net[it.payer] !== undefined) {
+      net[it.payer] += price;
+    }
+  });
+
+  // minimal transfers
+  let debtors   = state.members.filter(p => net[p] < -0.005).map(p => ({ name:p, amt:-net[p] }));
+  let creditors = state.members.filter(p => net[p] >  0.005).map(p => ({ name:p, amt: net[p] }));
+  debtors.sort((a,b) => b.amt-a.amt);
+  creditors.sort((a,b) => b.amt-a.amt);
+
+  let transfers = [], di=0, ci=0;
+  while (di < debtors.length && ci < creditors.length) {
+    const d=debtors[di], c=creditors[ci];
+    const amt = Math.min(d.amt, c.amt);
+    transfers.push({ from:d.name, to:c.name, amount:amt });
+    d.amt -= amt; c.amt -= amt;
+    if (d.amt < 0.005) di++;
+    if (c.amt < 0.005) ci++;
+  }
+
+  // render
+  const rs = document.getElementById('result-section');
+  const ra = document.getElementById('result-area');
+  rs.style.display = 'block';
+
+  let html = `<div class="result-card">
+    <div class="result-head">
+      <div class="result-head-title">账单结算</div>
+      <div class="result-total">¥${total.toFixed(2)}</div>
+    </div>
+    <div class="result-body">
+      ${state.members.map((p,i) => `
+        <div class="result-row">
+          <div class="result-row-top">
+            <div class="result-left">
+              <div class="result-avatar" style="background:${getColor(i)}22;color:${getColor(i)}">${getInit(p)}</div>
+              <span class="result-name">${p}${p===state.myName?' (我)':''}</span>
+            </div>
+            <span class="result-amt" style="color:${getColor(i)}">¥${(shares[p]||0).toFixed(2)}</span>
+          </div>
+          <div class="result-breakdown">
+            ${breakdown[p].map(b => `<span class="breakdown-item">${b.name} ¥${b.amt.toFixed(2)}</span>`).join('')}
+          </div>
+        </div>`).join('')}
+    </div>
+  </div>`;
+
+  if (transfers.length > 0) {
+    html += `<div class="transfer-card">
+      <div class="transfer-title">最简转账路径</div>
+      ${transfers.map(t => `
+        <div class="transfer-row">
+          <span>${t.from}</span>
+          <span class="t-arrow">→</span>
+          <span>${t.to}</span>
+          <span class="t-amt">¥${t.amount.toFixed(2)}</span>
+        </div>`).join('')}
+    </div>`;
+  } else {
+    html += `<div class="transfer-card" style="text-align:center;color:var(--green);font-size:15px;padding:20px">
+      ✅ 各自付清，不用转账
+    </div>`;
+  }
+
+  // screenshot card
+  html += `<div class="shot-card">
+    <div class="shot-top">
+      <div class="shot-top-l">📸 长按截图发群里</div>
+      <div class="shot-top-r">今晚谁欠谁</div>
+    </div>
+    <div class="shot-body">
+      ${validItems.map(it => `
+        <div class="shot-row">
+          <span>${it.name}</span>
+          <span>¥${parseFloat(it.price).toFixed(2)} · ${it.participants.length}人</span>
+        </div>`).join('')}
+      <div class="divider"></div>
+      ${state.members.map((p,i) => `
+        <div class="shot-row hi">
+          <span>${p}</span>
+          <span style="color:${getColor(i)}">¥${(shares[p]||0).toFixed(2)}</span>
+        </div>`).join('')}
+      ${transfers.length > 0 ? `
+        <div class="divider"></div>
+        ${transfers.map(t => `
+          <div class="shot-row tx">
+            <span>${t.from} → ${t.to}</span>
+            <span>¥${t.amount.toFixed(2)}</span>
+          </div>`).join('')}` : ''}
+    </div>
+    <div class="shot-foot">AA 分账 · 今晚谁欠谁</div>
+  </div>`;
+
+  ra.innerHTML = html;
+  setTimeout(() => rs.scrollIntoView({ behavior:'smooth', block:'start' }), 100);
+}
+
+// ── COPY LINK ──
+function copyLink() {
+  const url = new URL(window.location.href);
+  url.searchParams.set('room', state.roomId);
+  navigator.clipboard.writeText(url.toString()).then(() => showToast('链接已复制 🔗'));
+}
+
+// ── LEAVE ──
+function leaveRoom() {
+  if (state.channel) sb.removeChannel(state.channel);
+  state = { roomId:null, myName:null, members:[], items:[], channel:null };
+  const url = new URL(window.location.href);
+  url.searchParams.delete('room');
+  window.history.replaceState({}, '', url);
+  showPage('page-landing');
+}
+
+// ── INIT: check URL for room code ──
+window.addEventListener('load', () => {
+  const code = getRoomFromURL();
+  if (code) {
+    // pre-fill join code
+    document.getElementById('join-code').value = code;
+    document.getElementById('join-name').focus();
+    showToast('输入你的名字加入房间 👋');
+  }
+});
+</script>
+</body>
+</html>

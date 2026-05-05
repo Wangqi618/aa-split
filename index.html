@@ -325,7 +325,7 @@ async function joinRoom() {
 
 async function enterRoom(code, name) {
   R.id = code; R.me = name;
-  await sb.from('members').insert({ room_id: code, name }).catch(() => {});
+  try { await sb.from('members').insert({ room_id: code, name }); } catch(e) {}
   await loadMembers();
   await loadItems();
   setupRT();
@@ -390,7 +390,7 @@ async function addManual() {
   const name = inp.value.trim();
   if (!name) return;
   if (R.members.includes(name)) { toast(`"${name}" 已在列表`); return; }
-  await sb.from('members').insert({ room_id: R.id, name }).catch(() => {});
+  try { await sb.from('members').insert({ room_id: R.id, name }); } catch(e) {}
   inp.value = '';
   await loadMembers();
   toast(`已加入 ${name} 👤`);

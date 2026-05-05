@@ -7,129 +7,106 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&family=Noto+Sans+SC:wght@300;400;500;700&display=swap');
-
   :root {
-    --bg: #0d0d0d; --card: #181818; --card2: #1f1f1f;
-    --accent: #f0e040; --accent2: #ff6b35;
-    --text: #f0ece0; --muted: #555; --border: #272727;
-    --green: #4ade80; --radius: 16px;
+    --bg:#0d0d0d;--card:#181818;--card2:#1f1f1f;
+    --accent:#f0e040;--accent2:#ff6b35;
+    --text:#f0ece0;--muted:#555;--border:#272727;
+    --green:#4ade80;--radius:16px;
   }
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-  body {
-    background: var(--bg); color: var(--text);
-    font-family: 'Noto Sans SC', sans-serif;
-    min-height: 100vh; padding: 0 0 100px; overflow-x: hidden;
-  }
-
-  .header { padding: 32px 20px 16px; position: relative; }
-  .header-label { font-family:'Syne',sans-serif; font-size:10px; letter-spacing:3px; color:var(--muted); text-transform:uppercase; margin-bottom:6px; }
-  .header-title { font-family:'Syne',sans-serif; font-size:34px; font-weight:800; line-height:1.05; }
-  .header-title em { color:var(--accent); font-style:normal; }
-  .header-sub { font-size:13px; color:var(--muted); margin-top:6px; }
-  .header-deco { position:absolute; top:24px; right:20px; font-size:52px; opacity:0.12; animation:float 3s ease-in-out infinite; }
-  @keyframes float { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-8px)} }
-
-  .page { display:none; }
-  .page.active { display:block; }
-
-  .section { padding:0 16px; margin-bottom:14px; }
-  .section-title { font-family:'Syne',sans-serif; font-size:10px; letter-spacing:2.5px; color:var(--muted); text-transform:uppercase; margin-bottom:10px; padding-left:2px; display:flex; align-items:center; gap:8px; }
-  .count-badge { display:inline-flex; align-items:center; justify-content:center; width:18px; height:18px; border-radius:50%; background:var(--accent2); color:#fff; font-size:10px; font-weight:700; }
-
-  .input-field { background:var(--card); border:1.5px solid var(--border); border-radius:12px; padding:12px 14px; color:var(--text); font-size:15px; font-family:'Noto Sans SC',sans-serif; outline:none; transition:border-color 0.2s; width:100%; }
-  .input-field:focus { border-color:var(--accent); }
-  .input-field::placeholder { color:var(--muted); }
-
-  .btn { background:var(--accent); border:none; border-radius:12px; padding:13px 18px; color:#000; font-size:15px; font-weight:700; cursor:pointer; transition:all 0.15s; font-family:'Syne',sans-serif; white-space:nowrap; }
-  .btn:active { transform:scale(0.96); }
-  .btn.secondary { background:var(--card2); color:var(--text); border:1.5px solid var(--border); }
-  .btn.full { width:100%; padding:16px; font-size:16px; border-radius:var(--radius); }
-
-  .landing-card { background:var(--card); border:1.5px solid var(--border); border-radius:var(--radius); padding:20px; margin-bottom:12px; }
-  .landing-card h3 { font-family:'Syne',sans-serif; font-size:14px; font-weight:700; margin-bottom:12px; color:var(--accent); }
-  .field-group { display:flex; flex-direction:column; gap:5px; margin-bottom:10px; }
-  .field-label { font-size:10px; color:var(--muted); letter-spacing:1px; }
-  .or-divider { text-align:center; color:var(--muted); font-size:13px; margin:16px 0; position:relative; }
-  .or-divider::before,.or-divider::after { content:''; position:absolute; top:50%; width:40%; height:1px; background:var(--border); }
-  .or-divider::before { left:0; } .or-divider::after { right:0; }
-
-  .room-bar { background:var(--card2); border-bottom:1px solid var(--border); padding:10px 16px; display:flex; align-items:center; justify-content:space-between; margin-bottom:4px; }
-  .room-code { font-family:'Syne',sans-serif; font-size:13px; color:var(--accent); font-weight:700; letter-spacing:2px; }
-  .room-user { font-size:13px; color:var(--muted); }
-  .copy-btn { font-size:12px; color:var(--accent2); background:none; border:none; cursor:pointer; font-family:'Noto Sans SC',sans-serif; padding:4px 8px; }
-  .live-dot { width:7px; height:7px; border-radius:50%; background:var(--green); display:inline-block; margin-right:4px; animation:pulse 2s infinite; }
-  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.3} }
-
-  .members-row { display:flex; flex-wrap:wrap; gap:6px; margin-bottom:10px; }
-  .member-chip { display:flex; align-items:center; gap:5px; background:var(--card); border:1.5px solid var(--border); border-radius:100px; padding:5px 10px 5px 8px; font-size:13px; animation:popIn 0.25s cubic-bezier(.34,1.56,.64,1); }
-  .member-chip.me { border-color:var(--accent); background:rgba(240,224,64,0.06); }
-  .avatar { width:20px; height:20px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:11px; font-weight:700; flex-shrink:0; }
-  @keyframes popIn { from{opacity:0;transform:scale(0.88) translateY(6px)} to{opacity:1;transform:scale(1) translateY(0)} }
-
-  .item-card { background:var(--card); border:1.5px solid var(--border); border-radius:var(--radius); padding:14px; margin-bottom:10px; position:relative; }
-  .item-card.mine { border-color:rgba(240,224,64,0.25); }
-  .item-who { font-size:10px; color:var(--muted); margin-bottom:8px; letter-spacing:1px; }
-  .item-who span { color:var(--accent2); font-weight:600; }
-  .item-header { display:flex; gap:10px; margin-bottom:12px; align-items:flex-end; }
-  .price-wrap { position:relative; }
-  .price-prefix { position:absolute; left:12px; top:50%; transform:translateY(-50%); color:var(--muted); font-size:14px; pointer-events:none; }
-  .price-wrap .input-field { padding-left:24px; width:96px; }
-  .item-rm { position:absolute; top:10px; right:10px; background:none; border:none; color:var(--muted); font-size:20px; cursor:pointer; line-height:1; padding:4px; }
-
-  .pill-row { display:flex; flex-wrap:wrap; gap:6px; margin-top:6px; }
-  .pill-label { font-size:11px; color:var(--muted); display:flex; align-items:center; justify-content:space-between; }
-  .all-btn { font-size:11px; color:var(--accent2); background:none; border:none; cursor:pointer; font-family:'Noto Sans SC',sans-serif; }
-
-  .p-pill { padding:6px 12px; border-radius:100px; border:1.5px solid var(--border); font-size:13px; cursor:pointer; display:flex; align-items:center; gap:4px; background:var(--card2); color:var(--muted); user-select:none; transition:all 0.12s; min-height:34px; }
-  .p-pill.active { border-color:var(--accent); color:var(--accent); background:rgba(240,224,64,0.08); }
-  .p-pill .dot { width:6px; height:6px; border-radius:50%; background:var(--border); transition:background 0.12s; flex-shrink:0; }
-  .p-pill.active .dot { background:var(--accent); }
-
-  .payer-pill { padding:6px 12px; border-radius:100px; border:1.5px solid var(--border); font-size:13px; cursor:pointer; display:flex; align-items:center; gap:4px; background:var(--card2); color:var(--muted); user-select:none; transition:all 0.12s; min-height:34px; }
-  .payer-pill.active { border-color:var(--accent2); color:var(--accent2); background:rgba(255,107,53,0.08); }
-  .payer-pill .dot { width:6px; height:6px; border-radius:50%; background:var(--border); transition:background 0.12s; flex-shrink:0; }
-  .payer-pill.active .dot { background:var(--accent2); }
-
-  .divider { height:1px; background:var(--border); margin:10px 0; }
-
-  .result-card { background:var(--card); border:1.5px solid var(--border); border-radius:var(--radius); overflow:hidden; margin-bottom:12px; }
-  .result-head { background:var(--accent); padding:14px 18px; display:flex; align-items:center; justify-content:space-between; }
-  .result-head-title { font-family:'Syne',sans-serif; font-size:15px; font-weight:800; color:#000; }
-  .result-total { font-family:'Syne',sans-serif; font-size:22px; font-weight:800; color:#000; }
-  .result-body { padding:4px 18px 8px; }
-  .result-row { padding:11px 0; border-bottom:1px solid var(--border); }
-  .result-row:last-child { border-bottom:none; }
-  .result-row-top { display:flex; align-items:center; justify-content:space-between; margin-bottom:6px; }
-  .result-left { display:flex; align-items:center; gap:10px; }
-  .result-avatar { width:30px; height:30px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:13px; font-weight:700; }
-  .result-name { font-size:15px; font-weight:500; }
-  .result-amt { font-family:'Syne',sans-serif; font-size:18px; font-weight:700; }
-  .result-breakdown { padding-left:40px; display:flex; flex-wrap:wrap; gap:5px; }
-  .breakdown-item { font-size:11px; color:var(--muted); background:var(--card2); border-radius:6px; padding:3px 8px; }
-
-  .transfer-card { background:var(--card); border:1.5px solid var(--border); border-radius:var(--radius); padding:14px 18px; margin-bottom:12px; }
-  .transfer-title { font-family:'Syne',sans-serif; font-size:10px; letter-spacing:2px; color:var(--muted); text-transform:uppercase; margin-bottom:10px; }
-  .transfer-row { display:flex; align-items:center; gap:8px; padding:9px 12px; background:var(--card2); border-radius:10px; margin-bottom:6px; font-size:14px; }
-  .t-arrow { color:var(--accent2); font-size:15px; flex-shrink:0; }
-  .t-amt { margin-left:auto; font-family:'Syne',sans-serif; font-weight:700; color:var(--accent); }
-
-  .shot-card { background:#111; border:1.5px solid var(--accent); border-radius:var(--radius); overflow:hidden; }
-  .shot-top { background:#000; padding:12px 16px; display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid var(--border); }
-  .shot-top-l { font-size:12px; color:var(--muted); }
-  .shot-top-r { font-family:'Syne',sans-serif; font-size:13px; color:var(--accent); font-weight:700; }
-  .shot-body { padding:12px 16px; }
-  .shot-row { display:flex; justify-content:space-between; font-size:13px; padding:4px 0; color:var(--muted); }
-  .shot-row.hi { color:var(--text); font-weight:500; }
-  .shot-row.tx { color:var(--accent); }
-  .shot-foot { background:var(--accent); padding:11px 16px; text-align:center; font-size:11px; color:#000; font-weight:700; letter-spacing:1.5px; font-family:'Syne',sans-serif; }
-
-  .empty { text-align:center; padding:28px 20px; color:var(--muted); font-size:14px; }
-  .empty-icon { font-size:34px; margin-bottom:8px; }
-
-  .toast { position:fixed; bottom:24px; left:50%; transform:translateX(-50%) translateY(80px); background:var(--text); color:#000; padding:11px 22px; border-radius:100px; font-size:14px; font-weight:600; transition:transform 0.3s cubic-bezier(.34,1.56,.64,1); z-index:999; white-space:nowrap; pointer-events:none; }
-  .toast.show { transform:translateX(-50%) translateY(0); }
-
-  .bottom-actions { position:fixed; bottom:0; left:0; right:0; padding:12px 16px 16px; background:linear-gradient(transparent, var(--bg) 50%); display:flex; gap:10px; }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{background:var(--bg);color:var(--text);font-family:'Noto Sans SC',sans-serif;min-height:100vh;padding:0 0 100px;overflow-x:hidden;}
+  .header{padding:32px 20px 16px;position:relative;}
+  .header-label{font-family:'Syne',sans-serif;font-size:10px;letter-spacing:3px;color:var(--muted);text-transform:uppercase;margin-bottom:6px;}
+  .header-title{font-family:'Syne',sans-serif;font-size:34px;font-weight:800;line-height:1.05;}
+  .header-title em{color:var(--accent);font-style:normal;}
+  .header-sub{font-size:13px;color:var(--muted);margin-top:6px;}
+  .header-deco{position:absolute;top:24px;right:20px;font-size:52px;opacity:0.12;animation:float 3s ease-in-out infinite;}
+  @keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
+  .page{display:none;}.page.active{display:block;}
+  .section{padding:0 16px;margin-bottom:14px;}
+  .section-title{font-family:'Syne',sans-serif;font-size:10px;letter-spacing:2.5px;color:var(--muted);text-transform:uppercase;margin-bottom:10px;padding-left:2px;display:flex;align-items:center;gap:8px;}
+  .count-badge{display:inline-flex;align-items:center;justify-content:center;width:18px;height:18px;border-radius:50%;background:var(--accent2);color:#fff;font-size:10px;font-weight:700;}
+  .input-field{background:var(--card);border:1.5px solid var(--border);border-radius:12px;padding:12px 14px;color:var(--text);font-size:15px;font-family:'Noto Sans SC',sans-serif;outline:none;transition:border-color 0.2s;width:100%;}
+  .input-field:focus{border-color:var(--accent);}
+  .input-field::placeholder{color:var(--muted);}
+  .btn{background:var(--accent);border:none;border-radius:12px;padding:13px 18px;color:#000;font-size:15px;font-weight:700;cursor:pointer;transition:all 0.15s;font-family:'Syne',sans-serif;white-space:nowrap;}
+  .btn:active{transform:scale(0.96);}
+  .btn.secondary{background:var(--card2);color:var(--text);border:1.5px solid var(--border);}
+  .btn.full{width:100%;padding:16px;font-size:16px;border-radius:var(--radius);}
+  .landing-card{background:var(--card);border:1.5px solid var(--border);border-radius:var(--radius);padding:20px;margin-bottom:12px;}
+  .landing-card h3{font-family:'Syne',sans-serif;font-size:14px;font-weight:700;margin-bottom:12px;color:var(--accent);}
+  .field-group{display:flex;flex-direction:column;gap:5px;margin-bottom:10px;}
+  .field-label{font-size:10px;color:var(--muted);letter-spacing:1px;}
+  .or-divider{text-align:center;color:var(--muted);font-size:13px;margin:16px 0;position:relative;}
+  .or-divider::before,.or-divider::after{content:'';position:absolute;top:50%;width:40%;height:1px;background:var(--border);}
+  .or-divider::before{left:0;}.or-divider::after{right:0;}
+  .room-bar{background:var(--card2);border-bottom:1px solid var(--border);padding:10px 16px;display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;}
+  .room-code{font-family:'Syne',sans-serif;font-size:13px;color:var(--accent);font-weight:700;letter-spacing:2px;}
+  .copy-btn{font-size:12px;color:var(--accent2);background:none;border:none;cursor:pointer;font-family:'Noto Sans SC',sans-serif;padding:4px 8px;}
+  .live-dot{width:7px;height:7px;border-radius:50%;background:var(--green);display:inline-block;margin-right:4px;animation:pulse 2s infinite;}
+  @keyframes pulse{0%,100%{opacity:1}50%{opacity:0.3}}
+  .members-row{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px;}
+  .member-chip{display:flex;align-items:center;gap:5px;background:var(--card);border:1.5px solid var(--border);border-radius:100px;padding:5px 10px 5px 8px;font-size:13px;animation:popIn 0.2s cubic-bezier(.34,1.56,.64,1);}
+  .member-chip.me{border-color:var(--accent);background:rgba(240,224,64,0.06);}
+  .avatar{width:20px;height:20px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0;}
+  .add-row{display:flex;gap:8px;}
+  .add-member-toggle{font-size:12px;color:var(--muted);background:none;border:none;cursor:pointer;margin-top:4px;font-family:'Noto Sans SC',sans-serif;padding:0;}
+  @keyframes popIn{from{opacity:0;transform:scale(0.9) translateY(4px)}to{opacity:1;transform:scale(1) translateY(0)}}
+  .item-card{background:var(--card);border:1.5px solid var(--border);border-radius:var(--radius);padding:14px;margin-bottom:10px;position:relative;}
+  .item-card.mine{border-color:rgba(240,224,64,0.25);}
+  .item-who{font-size:10px;color:var(--muted);margin-bottom:8px;letter-spacing:1px;}
+  .item-who span{color:var(--accent2);font-weight:600;}
+  .item-header{display:flex;gap:10px;margin-bottom:12px;align-items:flex-end;}
+  .price-wrap{position:relative;}
+  .price-prefix{position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--muted);font-size:14px;pointer-events:none;}
+  .price-wrap .input-field{padding-left:24px;width:96px;}
+  .item-rm{position:absolute;top:10px;right:10px;background:none;border:none;color:var(--muted);font-size:20px;cursor:pointer;line-height:1;padding:4px;}
+  .pill-row{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px;}
+  .pill-label{font-size:11px;color:var(--muted);display:flex;align-items:center;justify-content:space-between;}
+  .all-btn{font-size:11px;color:var(--accent2);background:none;border:none;cursor:pointer;font-family:'Noto Sans SC',sans-serif;}
+  .p-pill{padding:6px 12px;border-radius:100px;border:1.5px solid var(--border);font-size:13px;cursor:pointer;display:flex;align-items:center;gap:4px;background:var(--card2);color:var(--muted);user-select:none;transition:all 0.12s;min-height:34px;}
+  .p-pill.active{border-color:var(--accent);color:var(--accent);background:rgba(240,224,64,0.08);}
+  .p-pill.ro{cursor:default;opacity:0.5;}
+  .p-pill .dot{width:6px;height:6px;border-radius:50%;background:var(--border);transition:background 0.12s;flex-shrink:0;}
+  .p-pill.active .dot{background:var(--accent);}
+  .payer-pill{padding:6px 12px;border-radius:100px;border:1.5px solid var(--border);font-size:13px;cursor:pointer;display:flex;align-items:center;gap:4px;background:var(--card2);color:var(--muted);user-select:none;transition:all 0.12s;min-height:34px;}
+  .payer-pill.active{border-color:var(--accent2);color:var(--accent2);background:rgba(255,107,53,0.08);}
+  .payer-pill .dot{width:6px;height:6px;border-radius:50%;background:var(--border);transition:background 0.12s;flex-shrink:0;}
+  .payer-pill.active .dot{background:var(--accent2);}
+  .divider{height:1px;background:var(--border);margin:10px 0;}
+  .result-card{background:var(--card);border:1.5px solid var(--border);border-radius:var(--radius);overflow:hidden;margin-bottom:12px;}
+  .result-head{background:var(--accent);padding:14px 18px;display:flex;align-items:center;justify-content:space-between;}
+  .result-head-title{font-family:'Syne',sans-serif;font-size:15px;font-weight:800;color:#000;}
+  .result-total{font-family:'Syne',sans-serif;font-size:22px;font-weight:800;color:#000;}
+  .result-body{padding:4px 18px 8px;}
+  .result-row{padding:11px 0;border-bottom:1px solid var(--border);}
+  .result-row:last-child{border-bottom:none;}
+  .result-row-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;}
+  .result-left{display:flex;align-items:center;gap:10px;}
+  .result-avatar{width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;}
+  .result-name{font-size:15px;font-weight:500;}
+  .result-amt{font-family:'Syne',sans-serif;font-size:18px;font-weight:700;}
+  .result-breakdown{padding-left:40px;display:flex;flex-wrap:wrap;gap:5px;margin-top:2px;}
+  .breakdown-item{font-size:11px;color:var(--muted);background:var(--card2);border-radius:6px;padding:3px 8px;}
+  .transfer-card{background:var(--card);border:1.5px solid var(--border);border-radius:var(--radius);padding:14px 18px;margin-bottom:12px;}
+  .transfer-title{font-family:'Syne',sans-serif;font-size:10px;letter-spacing:2px;color:var(--muted);text-transform:uppercase;margin-bottom:10px;}
+  .transfer-row{display:flex;align-items:center;gap:8px;padding:9px 12px;background:var(--card2);border-radius:10px;margin-bottom:6px;font-size:14px;}
+  .t-arrow{color:var(--accent2);font-size:15px;flex-shrink:0;}
+  .t-amt{margin-left:auto;font-family:'Syne',sans-serif;font-weight:700;color:var(--accent);}
+  .shot-card{background:#111;border:1.5px solid var(--accent);border-radius:var(--radius);overflow:hidden;}
+  .shot-top{background:#000;padding:12px 16px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--border);}
+  .shot-top-l{font-size:12px;color:var(--muted);}
+  .shot-top-r{font-family:'Syne',sans-serif;font-size:13px;color:var(--accent);font-weight:700;}
+  .shot-body{padding:12px 16px;}
+  .shot-row{display:flex;justify-content:space-between;font-size:13px;padding:4px 0;color:var(--muted);}
+  .shot-row.hi{color:var(--text);font-weight:500;}
+  .shot-row.tx{color:var(--accent);}
+  .shot-foot{background:var(--accent);padding:11px 16px;text-align:center;font-size:11px;color:#000;font-weight:700;letter-spacing:1.5px;font-family:'Syne',sans-serif;}
+  .empty{text-align:center;padding:28px 20px;color:var(--muted);font-size:14px;}
+  .empty-icon{font-size:34px;margin-bottom:8px;}
+  .toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(80px);background:var(--text);color:#000;padding:11px 22px;border-radius:100px;font-size:14px;font-weight:600;transition:transform 0.3s cubic-bezier(.34,1.56,.64,1);z-index:999;white-space:nowrap;pointer-events:none;}
+  .toast.show{transform:translateX(-50%) translateY(0);}
+  .bottom-actions{position:fixed;bottom:0;left:0;right:0;padding:12px 16px 16px;background:linear-gradient(transparent,var(--bg) 50%);display:flex;gap:10px;}
 </style>
 </head>
 <body>
@@ -141,9 +118,18 @@
   <div class="header-deco">💸</div>
 </div>
 
-<!-- 落地页 -->
 <div class="page active" id="page-landing">
   <div class="section">
+
+    <!-- 上次会话快速入口 -->
+    <div id="last-session-banner" style="display:none;background:rgba(240,224,64,0.08);border:1.5px solid rgba(240,224,64,0.25);border-radius:var(--radius);padding:14px 16px;margin-bottom:12px;align-items:center;justify-content:space-between;gap:10px">
+      <div>
+        <div style="font-size:10px;color:var(--muted);letter-spacing:1px;margin-bottom:4px">上次的房间</div>
+        <div id="last-room-text" style="font-family:Syne,sans-serif;font-size:14px;font-weight:700;color:var(--accent)"></div>
+      </div>
+      <button class="btn" onclick="rejoinLast()" style="padding:10px 16px;font-size:14px;white-space:nowrap;flex-shrink:0">回到房间 →</button>
+    </div>
+
     <div class="landing-card">
       <h3>🍽️ 发起一个新账单</h3>
       <div class="field-group">
@@ -168,15 +154,11 @@
   </div>
 </div>
 
-<!-- 房间页 -->
 <div class="page" id="page-room">
   <div class="room-bar">
-    <div>
-      <span class="live-dot"></span>
-      <span class="room-code" id="room-code-display"></span>
-    </div>
-    <div style="display:flex;align-items:center;gap:8px">
-      <span class="room-user" id="room-user-display"></span>
+    <div><span class="live-dot"></span><span class="room-code" id="room-code-display"></span></div>
+    <div style="display:flex;align-items:center;gap:4px">
+      <span style="font-size:12px;color:var(--muted)" id="room-user-display"></span>
       <button class="copy-btn" onclick="copyLink()">复制链接</button>
     </div>
   </div>
@@ -184,6 +166,11 @@
   <div class="section" style="margin-top:10px">
     <div class="section-title">在场的人 <span id="members-badge"></span></div>
     <div class="members-row" id="members-list"></div>
+    <div class="add-row" id="manual-add-row" style="display:none;margin-bottom:6px">
+      <input class="input-field" id="manual-name" placeholder="没来的人的名字…" maxlength="8" style="flex:1">
+      <button class="btn secondary" onclick="addManual()">加入</button>
+    </div>
+    <button class="add-member-toggle" id="toggle-btn" onclick="toggleManual()">＋ 手动加没来的人</button>
   </div>
 
   <div class="section">
@@ -207,463 +194,392 @@
 <div class="toast" id="toast"></div>
 
 <script>
-const SUPABASE_URL = 'https://xrleopqmfeebgnltcjew.supabase.co';
-const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhybGVvcHFtZmVlYmdubHRjamV3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc5NzMzNzgsImV4cCI6MjA5MzU0OTM3OH0.jQnyfBJ0hdBb5YV8jm1ANwthTie2I6Hk8MqyPzjI01k';
-const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+const SB_URL = 'https://xrleopqmfeebgnltcjew.supabase.co';
+const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhybGVvcHFtZmVlYmdubHRjamV3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc5NzMzNzgsImV4cCI6MjA5MzU0OTM3OH0.jQnyfBJ0hdBb5YV8jm1ANwthTie2I6Hk8MqyPzjI01k';
+const sb = supabase.createClient(SB_URL, SB_KEY);
 
-const COLORS = ['#f0e040','#ff6b35','#4ade80','#60a5fa','#f472b6','#a78bfa','#fb923c','#34d399'];
-const getColor = i => COLORS[i % COLORS.length];
-const getInit  = n => n ? n.slice(0,1).toUpperCase() : '?';
+const COLORS=['#f0e040','#ff6b35','#4ade80','#60a5fa','#f472b6','#a78bfa','#fb923c','#34d399'];
+const gc=i=>COLORS[i%COLORS.length];
+const gi=n=>n?n[0].toUpperCase():'?';
 
-let state = { roomId:null, myName:null, members:[], items:[], channel:null };
+let S={roomId:null,myName:null,members:[],items:[],ch:null};
+// Set of item IDs currently being edited by this user — realtime won't overwrite these
+const editing=new Set();
 
-// 防止自己的写操作触发自己的realtime刷新
-let isSaving = false;
-
-function showToast(msg) {
-  const t = document.getElementById('toast');
-  t.textContent = msg;
-  t.classList.add('show');
-  setTimeout(() => t.classList.remove('show'), 2200);
+function toast(msg){
+  const t=document.getElementById('toast');
+  t.textContent=msg;t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),2200);
 }
-
-function showPage(id) {
-  document.querySelectorAll('.page').forEach(p => p.classList.toggle('active', p.id === id));
+function showPage(id){
+  document.querySelectorAll('.page').forEach(p=>p.classList.toggle('active',p.id===id));
   window.scrollTo(0,0);
 }
+function genCode(){return Math.random().toString(36).slice(2,8).toUpperCase();}
+function roomFromURL(){return new URLSearchParams(location.search).get('room');}
 
-function genCode() {
-  return Math.random().toString(36).substring(2,8).toUpperCase();
+async function createRoom(){
+  const name=document.getElementById('create-name').value.trim();
+  if(!name){toast('请输入你的名字');return;}
+  const code=genCode();
+  await sb.from('rooms').insert({id:code});
+  await enter(code,name);
 }
-
-function getRoomFromURL() {
-  return new URLSearchParams(window.location.search).get('room');
+async function joinRoom(){
+  const name=document.getElementById('join-name').value.trim();
+  const code=document.getElementById('join-code').value.trim().toUpperCase();
+  if(!name){toast('请输入你的名字');return;}
+  if(code.length!==6){toast('请输入6位房间码');return;}
+  const{data}=await sb.from('rooms').select('id').eq('id',code).single();
+  if(!data){toast('房间不存在');return;}
+  await enter(code,name);
 }
-
-// ── CREATE / JOIN ──
-async function createRoom() {
-  const name = document.getElementById('create-name').value.trim();
-  if (!name) { showToast('请输入你的名字'); return; }
-  const code = genCode();
-  const { error } = await sb.from('rooms').insert({ id: code });
-  if (error) { showToast('创建失败，请重试'); return; }
-  await enterRoom(code, name);
-}
-
-async function joinRoom() {
-  const name = document.getElementById('join-name').value.trim();
-  const code = document.getElementById('join-code').value.trim().toUpperCase();
-  if (!name) { showToast('请输入你的名字'); return; }
-  if (!code || code.length !== 6) { showToast('请输入6位房间码'); return; }
-  const { data } = await sb.from('rooms').select('id').eq('id', code).single();
-  if (!data) { showToast('房间不存在，检查一下码'); return; }
-  await enterRoom(code, name);
-}
-
-async function enterRoom(code, name) {
-  state.roomId = code;
-  state.myName = name;
-
-  // 加入成员（已存在则忽略）
-  await sb.from('members').insert({ room_id: code, name }).then(() => {});
-
-  await loadMembers();
-  await loadItems();
-  setupRealtime();
-
-  const url = new URL(window.location.href);
-  url.searchParams.set('room', code);
-  window.history.replaceState({}, '', url);
-
-  document.getElementById('room-code-display').textContent = code;
-  document.getElementById('room-user-display').textContent = name;
+async function enter(code,name){
+  S.roomId=code;S.myName=name;
+  await sb.from('members').insert({room_id:code,name}).catch(()=>{});
+  await loadMembers();await loadItems();
+  setupRT();
+  const u=new URL(location.href);u.searchParams.set('room',code);history.replaceState({},'',u);
+  document.getElementById('room-code-display').textContent=code;
+  document.getElementById('room-user-display').textContent=name;
   showPage('page-room');
 }
 
-// ── LOAD ──
-async function loadMembers() {
-  const { data } = await sb.from('members').select('name').eq('room_id', state.roomId).order('joined_at');
-  state.members = data ? data.map(m => m.name) : [];
-  renderMembers();
+// Manual member
+let manualOpen=false;
+function toggleManual(){
+  manualOpen=!manualOpen;
+  document.getElementById('manual-add-row').style.display=manualOpen?'flex':'none';
+  document.getElementById('toggle-btn').textContent=manualOpen?'收起':'＋ 手动加没来的人';
+  if(manualOpen)document.getElementById('manual-name').focus();
+}
+async function addManual(){
+  const inp=document.getElementById('manual-name');
+  const name=inp.value.trim();
+  if(!name)return;
+  if(S.members.includes(name)){toast('"'+name+'" 已在列表');return;}
+  await sb.from('members').insert({room_id:S.roomId,name}).catch(()=>{});
+  inp.value='';
+  await loadMembers();
+  toast('已加入 '+name+' 👤');
 }
 
-async function loadItems() {
-  const { data } = await sb.from('items').select('*').eq('room_id', state.roomId).order('created_at');
-  // 只更新非当前正在编辑的项目，避免打断输入
-  const focusedId = document.activeElement ? document.activeElement.dataset.itemId : null;
-  if (data) {
-    data.forEach(newItem => {
-      const existing = state.items.find(i => i.id === newItem.id);
-      // 如果这条正在被当前用户编辑，不覆盖本地状态
-      if (existing && existing._editing) return;
-      const idx = state.items.findIndex(i => i.id === newItem.id);
-      if (idx >= 0) state.items[idx] = newItem;
-      else state.items.push(newItem);
-    });
-    // 删除已不存在的
-    const ids = data.map(i => i.id);
-    state.items = state.items.filter(i => ids.includes(i.id));
-  } else {
-    state.items = [];
-  }
+async function loadMembers(){
+  const{data}=await sb.from('members').select('name').eq('room_id',S.roomId).order('joined_at');
+  S.members=data?data.map(m=>m.name):[];
+  renderMembers();
+}
+async function loadItems(){
+  const{data}=await sb.from('items').select('*').eq('room_id',S.roomId).order('created_at');
+  if(!data)return;
+  const remoteIds=new Set(data.map(i=>i.id));
+  // remove deleted
+  S.items=S.items.filter(i=>remoteIds.has(i.id));
+  // merge
+  data.forEach(r=>{
+    const idx=S.items.findIndex(i=>i.id===r.id);
+    if(idx>=0){if(!editing.has(r.id))S.items[idx]=r;}
+    else S.items.push(r);
+  });
   renderItems();
 }
 
-// ── REALTIME ──
-function setupRealtime() {
-  if (state.channel) sb.removeChannel(state.channel);
-  state.channel = sb.channel('room-' + state.roomId)
-    .on('postgres_changes', {
-      event: '*', schema: 'public', table: 'members',
-      filter: 'room_id=eq.' + state.roomId
-    }, () => {
-      if (!isSaving) loadMembers();
-    })
-    .on('postgres_changes', {
-      event: '*', schema: 'public', table: 'items',
-      filter: 'room_id=eq.' + state.roomId
-    }, () => {
-      if (!isSaving) loadItems();
-    })
+function setupRT(){
+  if(S.ch)sb.removeChannel(S.ch);
+  S.ch=sb.channel('r-'+S.roomId)
+    .on('postgres_changes',{event:'INSERT',schema:'public',table:'members',filter:'room_id=eq.'+S.roomId},
+      ()=>loadMembers())
+    .on('postgres_changes',{event:'INSERT',schema:'public',table:'items',filter:'room_id=eq.'+S.roomId},
+      p=>{
+        if(!S.items.find(i=>i.id===p.new.id)){S.items.push(p.new);renderItems();}
+      })
+    .on('postgres_changes',{event:'DELETE',schema:'public',table:'items',filter:'room_id=eq.'+S.roomId},
+      p=>{S.items=S.items.filter(i=>i.id!==p.old.id);renderItems();})
+    .on('postgres_changes',{event:'UPDATE',schema:'public',table:'items',filter:'room_id=eq.'+S.roomId},
+      p=>{
+        if(editing.has(p.new.id))return; // don't overwrite what user is typing
+        const idx=S.items.findIndex(i=>i.id===p.new.id);
+        if(idx>=0){S.items[idx]=p.new;renderItems();}
+      })
     .subscribe();
 }
 
-// ── RENDER MEMBERS ──
-function renderMembers() {
-  document.getElementById('members-list').innerHTML = state.members.map((m,i) => `
-    <div class="member-chip ${m===state.myName?'me':''}">
-      <div class="avatar" style="background:${getColor(i)}22;color:${getColor(i)}">${getInit(m)}</div>
-      <span>${m}${m===state.myName?' (我)':''}</span>
+function renderMembers(){
+  document.getElementById('members-list').innerHTML=S.members.map((m,i)=>`
+    <div class="member-chip ${m===S.myName?'me':''}">
+      <div class="avatar" style="background:${gc(i)}22;color:${gc(i)}">${gi(m)}</div>
+      <span>${m}${m===S.myName?' (我)':''}</span>
     </div>`).join('');
-  const b = document.getElementById('members-badge');
-  b.innerHTML = state.members.length ? `<span class="count-badge">${state.members.length}</span>` : '';
+  const b=document.getElementById('members-badge');
+  b.innerHTML=S.members.length?`<span class="count-badge">${S.members.length}</span>`:'';
 }
 
-// ── ADD ITEM ──
-async function addItem() {
-  const members = state.members.length > 0 ? state.members : [state.myName];
-  isSaving = true;
-  const { data, error } = await sb.from('items').insert({
-    room_id: state.roomId,
-    name: '',
-    price: 0,
-    payer: state.myName,
-    participants: members,
+async function addItem(){
+  const members=S.members.length>0?S.members:[S.myName];
+  const{data,error}=await sb.from('items').insert({
+    room_id:S.roomId,name:'',price:0,payer:S.myName,participants:members
   }).select().single();
-  isSaving = false;
-  if (error) { showToast('添加失败'); return; }
-  data._editing = false;
-  state.items.push(data);
+  if(error){toast('添加失败');return;}
+  if(!S.items.find(i=>i.id===data.id))S.items.push(data);
   renderItems();
-  setTimeout(() => {
-    const fs = document.querySelectorAll('.item-name-field');
-    if (fs.length) fs[fs.length-1].focus();
-  }, 60);
+  setTimeout(()=>{const fs=document.querySelectorAll('.item-name-field');if(fs.length)fs[fs.length-1].focus();},60);
 }
-
-async function deleteItem(id) {
-  state.items = state.items.filter(i => i.id !== id);
+async function delItem(id){
+  editing.delete(id);
+  S.items=S.items.filter(i=>i.id!==id);
   renderItems();
-  isSaving = true;
-  await sb.from('items').delete().eq('id', id);
-  isSaving = false;
+  await sb.from('items').delete().eq('id',id);
 }
 
-// ── 本地更新（输入时只改内存，失去焦点才存数据库）──
-function onNameFocus(id) {
-  const it = state.items.find(i => i.id === id);
-  if (it) it._editing = true;
+// Input handlers — lock while editing, save on blur
+function onFocus(id){editing.add(id);}
+function onNameIn(id,v){const it=S.items.find(i=>i.id===id);if(it)it.name=v;}
+async function onNameBlur(id){
+  editing.delete(id);
+  const it=S.items.find(i=>i.id===id);if(!it)return;
+  await sb.from('items').update({name:it.name}).eq('id',id);
 }
-function onNameInput(id, v) {
-  const it = state.items.find(i => i.id === id);
-  if (it) it.name = v;
-}
-async function onNameBlur(id) {
-  const it = state.items.find(i => i.id === id);
-  if (!it) return;
-  it._editing = false;
-  isSaving = true;
-  await sb.from('items').update({ name: it.name }).eq('id', id);
-  isSaving = false;
-}
-
-function onPriceFocus(id) {
-  const it = state.items.find(i => i.id === id);
-  if (it) it._editing = true;
-}
-function onPriceInput(id, v) {
-  const it = state.items.find(i => i.id === id);
-  if (it) it.price = v;
-}
-async function onPriceBlur(id) {
-  const it = state.items.find(i => i.id === id);
-  if (!it) return;
-  it._editing = false;
-  isSaving = true;
-  await sb.from('items').update({ price: parseFloat(it.price) || 0 }).eq('id', id);
-  isSaving = false;
+function onPriceIn(id,v){const it=S.items.find(i=>i.id===id);if(it)it.price=v;}
+async function onPriceBlur(id){
+  editing.delete(id);
+  const it=S.items.find(i=>i.id===id);if(!it)return;
+  const price=parseFloat(String(it.price).replace(',','.'))||0;
+  it.price=price;
+  await sb.from('items').update({price}).eq('id',id);
 }
 
-function toggleParticipant(id, name) {
-  const it = state.items.find(i => i.id === id); if (!it) return;
-  const idx = it.participants.indexOf(name);
-  if (idx >= 0) {
-    if (it.participants.length === 1) { showToast('至少留一个人'); return; }
-    it.participants.splice(idx, 1);
-    if (it.payer === name) it.payer = 'each';
-  } else {
-    it.participants.push(name);
-  }
-  rerenderPills(id);
-  saveItemMeta(id);
+function toggleP(id,name){
+  const it=S.items.find(i=>i.id===id);if(!it||it.payer!==S.myName)return;
+  const idx=it.participants.indexOf(name);
+  if(idx>=0){
+    if(it.participants.length===1){toast('至少留一个人');return;}
+    it.participants.splice(idx,1);
+    if(it.payer===name)it.payer='each';
+  }else{it.participants.push(name);}
+  rerenderEaters(id);saveMeta(id);
+}
+function selAll(id){
+  const it=S.items.find(i=>i.id===id);if(!it)return;
+  it.participants=[...S.members];rerenderEaters(id);saveMeta(id);
+}
+function selPayer(id,name){
+  const it=S.items.find(i=>i.id===id);if(!it)return;
+  it.payer=it.payer===name?'each':name;
+  rerenderPayers(id);saveMeta(id);
+}
+async function saveMeta(id){
+  const it=S.items.find(i=>i.id===id);if(!it)return;
+  editing.add(id);
+  await sb.from('items').update({payer:it.payer,participants:it.participants}).eq('id',id);
+  setTimeout(()=>editing.delete(id),800);
 }
 
-function selectAllP(id) {
-  const it = state.items.find(i => i.id === id); if (!it) return;
-  it.participants = [...state.members];
-  rerenderPills(id);
-  saveItemMeta(id);
+function rerenderEaters(id){
+  const it=S.items.find(i=>i.id===id);if(!it)return;
+  const el=document.querySelector('[data-eater="'+id+'"]');if(!el)return;
+  const mine=it.payer===S.myName;
+  el.innerHTML=S.members.map(p=>`
+    <div class="p-pill ${it.participants.includes(p)?'active':''} ${!mine?'ro':''}"
+      ${mine?`onclick="toggleP('${id}','${p}')"`:''}><div class="dot"></div>${p}</div>`).join('');
+}
+function rerenderPayers(id){
+  const it=S.items.find(i=>i.id===id);if(!it)return;
+  const el=document.querySelector('[data-payer="'+id+'"]');if(!el)return;
+  const cands=it.participants.length>0?it.participants:S.members;
+  el.innerHTML=`<div class="payer-pill ${it.payer==='each'?'active':''}" onclick="selPayer('${id}','each')"><div class="dot"></div>各自付</div>`+
+    cands.map(p=>`<div class="payer-pill ${it.payer===p?'active':''}" onclick="selPayer('${id}','${p}')"><div class="dot"></div>${p}</div>`).join('');
 }
 
-function selectPayer(id, name) {
-  const it = state.items.find(i => i.id === id); if (!it) return;
-  it.payer = (it.payer === name) ? 'each' : name;
-  rerenderPayerPills(id);
-  saveItemMeta(id);
-}
-
-async function saveItemMeta(id) {
-  const it = state.items.find(i => i.id === id); if (!it) return;
-  isSaving = true;
-  await sb.from('items').update({ payer: it.payer, participants: it.participants }).eq('id', id);
-  isSaving = false;
-}
-
-function rerenderPills(id) {
-  const it = state.items.find(i => i.id === id); if (!it) return;
-  const el = document.querySelector('[data-eater="' + id + '"]'); if (!el) return;
-  el.innerHTML = state.members.map(p => `
-    <div class="p-pill ${it.participants.includes(p)?'active':''}" onclick="toggleParticipant('${id}','${p}')">
-      <div class="dot"></div>${p}</div>`).join('');
-  rerenderPayerPills(id);
-}
-
-function rerenderPayerPills(id) {
-  const it = state.items.find(i => i.id === id); if (!it) return;
-  const el = document.querySelector('[data-payer="' + id + '"]'); if (!el) return;
-  const candidates = it.participants.length > 0 ? it.participants : state.members;
-  el.innerHTML = `<div class="payer-pill ${it.payer==='each'?'active':''}" onclick="selectPayer('${id}','each')">
-    <div class="dot"></div>各自付</div>` +
-    candidates.map(p => `<div class="payer-pill ${it.payer===p?'active':''}" onclick="selectPayer('${id}','${p}')">
-      <div class="dot"></div>${p}</div>`).join('');
-}
-
-// ── RENDER ITEMS ──
-function renderItems() {
-  const el = document.getElementById('items-list');
-  const b  = document.getElementById('items-badge');
-  b.innerHTML = state.items.length ? `<span class="count-badge">${state.items.length}</span>` : '';
-
-  if (state.items.length === 0) {
-    el.innerHTML = `<div class="empty"><div class="empty-icon">🍽️</div>还没有人记账</div>`;
-    return;
-  }
-
-  el.innerHTML = state.items.map(it => {
-    const isMine = it.payer === state.myName || (!it.name && !it.price);
-    const priceDisplay = it.price ? it.price : '';
-    return `<div class="item-card ${isMine?'mine':''}">
-      ${isMine ? `<button class="item-rm" onclick="deleteItem('${it.id}')">×</button>` : ''}
-      <div class="item-who">由 <span>${it.payer === 'each' ? '大家' : it.payer}</span> 付款</div>
+function renderItems(){
+  const el=document.getElementById('items-list');
+  const b=document.getElementById('items-badge');
+  b.innerHTML=S.items.length?`<span class="count-badge">${S.items.length}</span>`:'';
+  if(!S.items.length){el.innerHTML=`<div class="empty"><div class="empty-icon">🍽️</div>还没有人记账</div>`;return;}
+  el.innerHTML=S.items.map(it=>{
+    const mine=it.payer===S.myName;
+    return `<div class="item-card ${mine?'mine':''}">
+      ${mine?`<button class="item-rm" onclick="delItem('${it.id}')">×</button>`:''}
+      <div class="item-who">由 <span>${it.payer==='each'?'大家':it.payer}</span> 付款</div>
       <div class="item-header">
         <div class="field-group" style="flex:1;margin-bottom:0">
           <div class="field-label">菜名 / 饮料</div>
-          <input class="input-field item-name-field" placeholder="奶茶、烤鱼…"
+          <input class="input-field item-name-field" placeholder="${mine?'奶茶、烤鱼…':'—'}"
             value="${it.name||''}"
-            data-item-id="${it.id}"
-            ${isMine
-              ? `onfocus="onNameFocus('${it.id}')" oninput="onNameInput('${it.id}',this.value)" onblur="onNameBlur('${it.id}')"` 
-              : 'readonly style="opacity:0.6"'}
-            style="padding-right:${isMine?'32px':'14px'}">
+            ${mine?`onfocus="onFocus('${it.id}')" oninput="onNameIn('${it.id}',this.value)" onblur="onNameBlur('${it.id}')"`:'readonly'}
+            style="padding-right:${mine?'32px':'14px'};${!mine?'opacity:0.7':''}">
         </div>
         <div class="field-group" style="margin-bottom:0">
           <div class="field-label">价格</div>
           <div class="price-wrap">
             <span class="price-prefix">¥</span>
             <input class="input-field" type="text" inputmode="decimal" placeholder="0.00"
-              value="${priceDisplay}"
-              data-item-id="${it.id}"
-              ${isMine
-                ? `onfocus="onPriceFocus('${it.id}')" oninput="onPriceInput('${it.id}',this.value)" onblur="onPriceBlur('${it.id}')"` 
-                : 'readonly style="opacity:0.6"'}>
+              value="${it.price||''}"
+              ${mine?`onfocus="onFocus('${it.id}')" oninput="onPriceIn('${it.id}',this.value)" onblur="onPriceBlur('${it.id}')"`:'readonly'}
+              style="${!mine?'opacity:0.7':''}">
           </div>
         </div>
       </div>
-
       <div class="pill-label" style="margin-top:10px">谁吃/喝？
-        ${isMine ? `<button class="all-btn" onclick="selectAllP('${it.id}')">全选</button>` : ''}
+        ${mine?`<button class="all-btn" onclick="selAll('${it.id}')">全选</button>`:''}
       </div>
       <div class="pill-row" data-eater="${it.id}">
-        ${state.members.map(p => `
-          <div class="p-pill ${it.participants.includes(p)?'active':''}"
-            ${isMine ? `onclick="toggleParticipant('${it.id}','${p}')"` : ''}>
-            <div class="dot"></div>${p}</div>`).join('')}
+        ${S.members.map(p=>`<div class="p-pill ${it.participants.includes(p)?'active':''} ${!mine?'ro':''}"
+          ${mine?`onclick="toggleP('${it.id}','${p}')"`:''}><div class="dot"></div>${p}</div>`).join('')}
       </div>
-
-      ${isMine ? `
+      ${mine?`
         <div class="divider" style="margin:10px 0 8px"></div>
         <div class="pill-label" style="margin-bottom:6px">谁付了这笔？</div>
         <div class="pill-row" data-payer="${it.id}">
-          <div class="payer-pill ${it.payer==='each'?'active':''}" onclick="selectPayer('${it.id}','each')">
-            <div class="dot"></div>各自付</div>
-          ${(it.participants.length>0?it.participants:state.members).map(p =>
-            `<div class="payer-pill ${it.payer===p?'active':''}" onclick="selectPayer('${it.id}','${p}')">
-              <div class="dot"></div>${p}</div>`).join('')}
-        </div>` : ''}
+          <div class="payer-pill ${it.payer==='each'?'active':''}" onclick="selPayer('${it.id}','each')"><div class="dot"></div>各自付</div>
+          ${(it.participants.length>0?it.participants:S.members).map(p=>`
+            <div class="payer-pill ${it.payer===p?'active':''}" onclick="selPayer('${it.id}','${p}')"><div class="dot"></div>${p}</div>`).join('')}
+        </div>`:''}
     </div>`;
   }).join('');
 }
 
-// ── CALCULATE ──
-function calculate() {
-  const validItems = state.items.filter(it => it.name && parseFloat(it.price) > 0);
-  if (validItems.length === 0) { showToast('还没有填好的账单'); return; }
-
-  let net = {}, shares = {}, breakdown = {};
-  state.members.forEach(p => { net[p]=0; shares[p]=0; breakdown[p]=[]; });
-
-  let total = 0;
-  validItems.forEach(it => {
-    const price  = parseFloat(it.price);
-    const eaters = it.participants.filter(p => state.members.includes(p));
-    const ps     = eaters.length > 0 ? eaters : state.members;
-    const share  = price / ps.length;
-    total += price;
-
-    ps.forEach(p => {
-      net[p]    -= share;
-      shares[p] += share;
-      breakdown[p].push({ name: it.name, amt: share });
-    });
-
-    if (it.payer === 'each') {
-      ps.forEach(p => net[p] += share);
-    } else if (state.members.includes(it.payer)) {
-      net[it.payer] += price;
-    }
+function calculate(){
+  const valid=S.items.filter(it=>it.name&&parseFloat(it.price)>0);
+  if(!valid.length){toast('还没有填好的账单');return;}
+  let net={},shares={},bd={};
+  S.members.forEach(p=>{net[p]=0;shares[p]=0;bd[p]=[];});
+  let total=0;
+  valid.forEach(it=>{
+    const price=parseFloat(it.price);
+    const ps=it.participants.filter(p=>S.members.includes(p));
+    const eaters=ps.length>0?ps:S.members;
+    const share=price/eaters.length;
+    total+=price;
+    eaters.forEach(p=>{net[p]-=share;shares[p]+=share;bd[p].push({name:it.name,amt:share});});
+    if(it.payer==='each'){eaters.forEach(p=>net[p]+=share);}
+    else if(S.members.includes(it.payer)){net[it.payer]+=price;}
   });
-
-  // 最简转账
-  let debtors   = state.members.filter(p => net[p] < -0.005).map(p => ({ name:p, amt:-net[p] }));
-  let creditors = state.members.filter(p => net[p] >  0.005).map(p => ({ name:p, amt: net[p] }));
-  debtors.sort((a,b) => b.amt-a.amt);
-  creditors.sort((a,b) => b.amt-a.amt);
-
-  let transfers=[], di=0, ci=0;
-  while (di < debtors.length && ci < creditors.length) {
-    const d=debtors[di], c=creditors[ci];
-    const amt=Math.min(d.amt,c.amt);
-    transfers.push({ from:d.name, to:c.name, amount:amt });
-    d.amt-=amt; c.amt-=amt;
-    if (d.amt<0.005) di++;
-    if (c.amt<0.005) ci++;
+  let deb=S.members.filter(p=>net[p]<-0.005).map(p=>({name:p,amt:-net[p]}));
+  let cred=S.members.filter(p=>net[p]>0.005).map(p=>({name:p,amt:net[p]}));
+  deb.sort((a,b)=>b.amt-a.amt);cred.sort((a,b)=>b.amt-a.amt);
+  let tr=[],di=0,ci=0;
+  while(di<deb.length&&ci<cred.length){
+    const d=deb[di],c=cred[ci],amt=Math.min(d.amt,c.amt);
+    tr.push({from:d.name,to:c.name,amount:amt});
+    d.amt-=amt;c.amt-=amt;
+    if(d.amt<0.005)di++;if(c.amt<0.005)ci++;
   }
-
-  const rs = document.getElementById('result-section');
-  const ra = document.getElementById('result-area');
-  rs.style.display = 'block';
-
-  let html = `<div class="result-card">
-    <div class="result-head">
-      <div class="result-head-title">账单结算</div>
-      <div class="result-total">¥${total.toFixed(2)}</div>
-    </div>
+  const rs=document.getElementById('result-section');
+  const ra=document.getElementById('result-area');
+  rs.style.display='block';
+  let html=`<div class="result-card">
+    <div class="result-head"><div class="result-head-title">账单结算</div><div class="result-total">¥${total.toFixed(2)}</div></div>
     <div class="result-body">
-      ${state.members.map((p,i) => `
+      ${S.members.map((p,i)=>`
         <div class="result-row">
           <div class="result-row-top">
             <div class="result-left">
-              <div class="result-avatar" style="background:${getColor(i)}22;color:${getColor(i)}">${getInit(p)}</div>
-              <span class="result-name">${p}${p===state.myName?' (我)':''}</span>
+              <div class="result-avatar" style="background:${gc(i)}22;color:${gc(i)}">${gi(p)}</div>
+              <span class="result-name">${p}${p===S.myName?' (我)':''}</span>
             </div>
-            <span class="result-amt" style="color:${getColor(i)}">¥${(shares[p]||0).toFixed(2)}</span>
+            <span class="result-amt" style="color:${gc(i)}">¥${(shares[p]||0).toFixed(2)}</span>
           </div>
           <div class="result-breakdown">
-            ${(breakdown[p]||[]).map(b => `<span class="breakdown-item">${b.name} ¥${b.amt.toFixed(2)}</span>`).join('')}
+            ${(bd[p]||[]).map(b=>`<span class="breakdown-item">${b.name} ¥${b.amt.toFixed(2)}</span>`).join('')}
           </div>
         </div>`).join('')}
-    </div>
-  </div>`;
-
-  if (transfers.length > 0) {
-    html += `<div class="transfer-card">
-      <div class="transfer-title">最简转账路径</div>
-      ${transfers.map(t => `
-        <div class="transfer-row">
-          <span>${t.from}</span><span class="t-arrow">→</span><span>${t.to}</span>
-          <span class="t-amt">¥${t.amount.toFixed(2)}</span>
-        </div>`).join('')}
+    </div></div>`;
+  if(tr.length){
+    html+=`<div class="transfer-card"><div class="transfer-title">最简转账路径</div>
+      ${tr.map(t=>`<div class="transfer-row"><span>${t.from}</span><span class="t-arrow">→</span><span>${t.to}</span><span class="t-amt">¥${t.amount.toFixed(2)}</span></div>`).join('')}
     </div>`;
-  } else {
-    html += `<div class="transfer-card" style="text-align:center;color:var(--green);font-size:15px;padding:20px">
-      ✅ 各自付清，不用转账
-    </div>`;
+  }else{
+    html+=`<div class="transfer-card" style="text-align:center;color:var(--green);font-size:15px;padding:20px">✅ 各自付清，不用转账</div>`;
   }
-
-  html += `<div class="shot-card">
-    <div class="shot-top">
-      <div class="shot-top-l">📸 长按截图发群里</div>
-      <div class="shot-top-r">今晚谁欠谁</div>
-    </div>
+  html+=`<div class="shot-card">
+    <div class="shot-top"><div class="shot-top-l">📸 长按截图发群里</div><div class="shot-top-r">今晚谁欠谁</div></div>
     <div class="shot-body">
-      ${validItems.map(it => `
-        <div class="shot-row">
-          <span>${it.name}</span>
-          <span>¥${parseFloat(it.price).toFixed(2)} · ${it.participants.length}人</span>
-        </div>`).join('')}
+      ${valid.map(it=>`<div class="shot-row"><span>${it.name}</span><span>¥${parseFloat(it.price).toFixed(2)} · ${it.participants.length}人</span></div>`).join('')}
       <div class="divider"></div>
-      ${state.members.map((p,i) => `
-        <div class="shot-row hi">
-          <span>${p}</span>
-          <span style="color:${getColor(i)}">¥${(shares[p]||0).toFixed(2)}</span>
-        </div>`).join('')}
-      ${transfers.length>0 ? `<div class="divider"></div>
-        ${transfers.map(t => `
-          <div class="shot-row tx">
-            <span>${t.from} → ${t.to}</span>
-            <span>¥${t.amount.toFixed(2)}</span>
-          </div>`).join('')}` : ''}
+      ${S.members.map((p,i)=>`<div class="shot-row hi"><span>${p}</span><span style="color:${gc(i)}">¥${(shares[p]||0).toFixed(2)}</span></div>`).join('')}
+      ${tr.length?'<div class="divider"></div>'+tr.map(t=>`<div class="shot-row tx"><span>${t.from} → ${t.to}</span><span>¥${t.amount.toFixed(2)}</span></div>`).join(''):''}
     </div>
     <div class="shot-foot">AA 分账 · 今晚谁欠谁</div>
   </div>`;
-
-  ra.innerHTML = html;
-  setTimeout(() => rs.scrollIntoView({ behavior:'smooth', block:'start' }), 100);
+  ra.innerHTML=html;
+  setTimeout(()=>rs.scrollIntoView({behavior:'smooth',block:'start'}),100);
 }
 
-function copyLink() {
-  const url = new URL(window.location.href);
-  url.searchParams.set('room', state.roomId);
-  navigator.clipboard.writeText(url.toString()).then(() => showToast('链接已复制 🔗'));
+function copyLink(){
+  const u=new URL(location.href);u.searchParams.set('room',S.roomId);
+  navigator.clipboard.writeText(u.toString()).then(()=>toast('链接已复制 🔗'));
 }
-
-function leaveRoom() {
-  if (state.channel) sb.removeChannel(state.channel);
-  state = { roomId:null, myName:null, members:[], items:[], channel:null };
-  const url = new URL(window.location.href);
-  url.searchParams.delete('room');
-  window.history.replaceState({}, '', url);
-  document.getElementById('result-section').style.display = 'none';
+function leaveRoom(){
+  if(S.ch)sb.removeChannel(S.ch);
+  S={roomId:null,myName:null,members:[],items:[],ch:null};editing.clear();
+  const u=new URL(location.href);u.searchParams.delete('room');history.replaceState({},'',u);
+  document.getElementById('result-section').style.display='none';
   showPage('page-landing');
+  // 保留localStorage记录，下次可以快速回来
+  fillLastSession();
 }
 
-window.addEventListener('load', () => {
-  const code = getRoomFromURL();
-  if (code) {
-    document.getElementById('join-code').value = code;
-    document.getElementById('join-name').focus();
-    showToast('输入你的名字加入房间 👋');
+// ── 记住上次会话 ──
+function saveSession(code,name){
+  try{localStorage.setItem('aa_room',code);localStorage.setItem('aa_name',name);}catch(e){}
+}
+function clearSession(){
+  try{localStorage.removeItem('aa_room');localStorage.removeItem('aa_name');}catch(e){}
+}
+function getSession(){
+  try{return{code:localStorage.getItem('aa_room'),name:localStorage.getItem('aa_name')};}
+  catch(e){return{code:null,name:null};}
+}
+
+// 在落地页显示"上次的房间"快速入口
+function fillLastSession(){
+  const{code,name}=getSession();
+  const banner=document.getElementById('last-session-banner');
+  if(code&&name){
+    document.getElementById('last-room-text').textContent=`上次：${name} · ${code}`;
+    banner.style.display='flex';
+  }else{
+    banner.style.display='none';
   }
+}
+
+async function rejoinLast(){
+  const{code,name}=getSession();
+  if(!code||!name)return;
+  // 验证房间还存在
+  const{data}=await sb.from('rooms').select('id').eq('id',code).single();
+  if(!data){toast('上次的房间已过期');clearSession();fillLastSession();return;}
+  await enter(code,name);
+}
+
+// 覆盖enter，加入存session逻辑
+const _origEnter=enter;
+async function enter(code,name){
+  S.roomId=code;S.myName=name;
+  await sb.from('members').insert({room_id:code,name}).catch(()=>{});
+  await loadMembers();await loadItems();
+  setupRT();
+  const u=new URL(location.href);u.searchParams.set('room',code);history.replaceState({},'',u);
+  document.getElementById('room-code-display').textContent=code;
+  document.getElementById('room-user-display').textContent=name;
+  saveSession(code,name); // 记住
+  showPage('page-room');
+}
+
+window.addEventListener('load',()=>{
+  const code=roomFromURL();
+  if(code){
+    // URL里有房间码（朋友分享的链接）
+    const{name}=getSession();
+    document.getElementById('join-code').value=code;
+    if(name)document.getElementById('join-name').value=name;
+    document.getElementById('join-name').focus();
+    toast('输入你的名字加入房间 👋');
+  }
+  fillLastSession();
+  document.getElementById('manual-name').addEventListener('keydown',e=>{if(e.key==='Enter')addManual();});
+  document.getElementById('join-name').addEventListener('keydown',e=>{if(e.key==='Enter')joinRoom();});
+  document.getElementById('create-name').addEventListener('keydown',e=>{if(e.key==='Enter')createRoom();});
 });
 </script>
 </body>

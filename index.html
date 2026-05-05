@@ -3,10 +3,10 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-<title>今晚谁欠谁💸</title>
+<title>AAnow💸</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
-  @import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&family=Noto+Sans+SC:wght@300;400;500;700&display=swap');
+  @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Syne:wght@400;700;800&family=Noto+Sans+SC:wght@300;400;500;700&display=swap');
   :root {
     --bg:#0d0d0d;--card:#181818;--card2:#1f1f1f;
     --accent:#f0e040;--accent2:#ff6b35;
@@ -15,13 +15,13 @@
   }
   *{box-sizing:border-box;margin:0;padding:0;}
   body{background:var(--bg);color:var(--text);font-family:'Noto Sans SC',sans-serif;min-height:100vh;padding:0 0 100px;overflow-x:hidden;}
-  .header{padding:32px 20px 16px;position:relative;}
-  .header-label{font-family:'Syne',sans-serif;font-size:10px;letter-spacing:3px;color:var(--muted);text-transform:uppercase;margin-bottom:6px;}
-  .header-title{font-family:'Syne',sans-serif;font-size:34px;font-weight:800;line-height:1.05;}
-  .header-title em{color:var(--accent);font-style:normal;}
-  .header-sub{font-size:13px;color:var(--muted);margin-top:6px;}
-  .header-deco{position:absolute;top:24px;right:20px;font-size:52px;opacity:0.12;animation:float 3s ease-in-out infinite;}
+  .header{padding:24px 20px 18px;position:sticky;top:0;z-index:100;background:var(--bg);border-bottom:1px solid var(--border);}
+  .header-title{font-family:'Syne',sans-serif;font-size:42px;font-weight:800;line-height:1.1;display:flex;align-items:baseline;gap:0;}
+  .header-title .a-char{color:#f0e040;font-family:'Syne',sans-serif;font-style:normal;display:inline-block;animation:popA 0.35s cubic-bezier(.34,1.56,.64,1);}
+  .header-title .now{color:var(--text);font-family:'Syne',sans-serif;font-size:38px;margin-left:2px;}
+  .header-deco{position:absolute;top:20px;right:20px;font-size:44px;opacity:0.45;animation:float 3s ease-in-out infinite;}
   @keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
+  @keyframes popA{from{opacity:0;transform:scale(0.5) translateY(8px)}to{opacity:1;transform:scale(1) translateY(0)}}
   .page{display:none;}.page.active{display:block;}
   .section{padding:0 16px;margin-bottom:14px;}
   .section-title{font-family:'Syne',sans-serif;font-size:10px;letter-spacing:2.5px;color:var(--muted);text-transform:uppercase;margin-bottom:10px;padding-left:2px;display:flex;align-items:center;gap:8px;}
@@ -112,9 +112,8 @@
 <body>
 
 <div class="header">
-  <div class="header-label">AA 分账</div>
-  <div class="header-title">今晚<em>谁欠谁</em></div>
-  <div class="header-sub">聚餐 · 奶茶 · 任何饭局</div>
+  <div class="header-title" id="main-title"><span class="a-char" style="animation:none">A</span><span class="a-char" style="animation:none">A</span><span class="now">now</span></div>
+  <div class="header-sub"></div>
   <div class="header-deco">💸</div>
 </div>
 
@@ -234,17 +233,6 @@ async function joinRoom(){
   if(!data){toast('房间不存在');return;}
   await enter(code,name);
 }
-async function enter(code,name){
-  S.roomId=code;S.myName=name;
-  await sb.from('members').insert({room_id:code,name}).catch(()=>{});
-  await loadMembers();await loadItems();
-  setupRT();
-  const u=new URL(location.href);u.searchParams.set('room',code);history.replaceState({},'',u);
-  document.getElementById('room-code-display').textContent=code;
-  document.getElementById('room-user-display').textContent=name;
-  showPage('page-room');
-}
-
 // Manual member
 let manualOpen=false;
 function toggleManual(){
@@ -304,6 +292,22 @@ function setupRT(){
     .subscribe();
 }
 
+function updateTitle(){
+  const count=Math.max(2, S.members.length);
+  const title=document.getElementById('main-title');
+  if(!title)return;
+  const current=title.querySelectorAll('.a-char').length;
+  if(current===count)return;
+  // rebuild with animation only on new chars
+  let html='';
+  for(let i=0;i<count;i++){
+    const isNew=i>=current;
+    html+=`<span class="a-char" ${isNew?'':'style="animation:none"'}>A</span>`;
+  }
+  html+='<span class="now">now</span>';
+  title.innerHTML=html;
+}
+
 function renderMembers(){
   document.getElementById('members-list').innerHTML=S.members.map((m,i)=>`
     <div class="member-chip ${m===S.myName?'me':''}">
@@ -312,6 +316,7 @@ function renderMembers(){
     </div>`).join('');
   const b=document.getElementById('members-badge');
   b.innerHTML=S.members.length?`<span class="count-badge">${S.members.length}</span>`:'';
+  updateTitle();
 }
 
 async function addItem(){
@@ -492,14 +497,14 @@ function calculate(){
     html+=`<div class="transfer-card" style="text-align:center;color:var(--green);font-size:15px;padding:20px">✅ 各自付清，不用转账</div>`;
   }
   html+=`<div class="shot-card">
-    <div class="shot-top"><div class="shot-top-l">📸 长按截图发群里</div><div class="shot-top-r">今晚谁欠谁</div></div>
+    <div class="shot-top"><div class="shot-top-l">📸 长按截图发群里</div><div class="shot-top-r">AAnow</div></div>
     <div class="shot-body">
       ${valid.map(it=>`<div class="shot-row"><span>${it.name}</span><span>¥${parseFloat(it.price).toFixed(2)} · ${it.participants.length}人</span></div>`).join('')}
       <div class="divider"></div>
       ${S.members.map((p,i)=>`<div class="shot-row hi"><span>${p}</span><span style="color:${gc(i)}">¥${(shares[p]||0).toFixed(2)}</span></div>`).join('')}
       ${tr.length?'<div class="divider"></div>'+tr.map(t=>`<div class="shot-row tx"><span>${t.from} → ${t.to}</span><span>¥${t.amount.toFixed(2)}</span></div>`).join(''):''}
     </div>
-    <div class="shot-foot">AA 分账 · 今晚谁欠谁</div>
+    <div class="shot-foot">AAnow · AAnow</div>
   </div>`;
   ra.innerHTML=html;
   setTimeout(()=>rs.scrollIntoView({behavior:'smooth',block:'start'}),100);

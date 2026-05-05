@@ -666,8 +666,10 @@ function selAll(id) {
 }
 function selPayer(id, name) {
   const it = R.items.find(i => i.id === id); if (!it) return;
-  // payer 可以改，不影响编辑权限（creator才决定谁能编辑）
   it.payer = it.payer === name ? 'each' : name;
+  // Update the "由X付款" display
+  const whoEl = document.querySelector(`[data-ic="${id}"] .ic-who b`);
+  if (whoEl) whoEl.textContent = it.payer === 'each' ? '大家' : it.payer;
   reRenderPayers(id); saveMeta(id);
 }
 async function saveMeta(id) {
@@ -722,51 +724,158 @@ function calculate() {
   }
 
   // Store for personal bill view
-  window._calcData = { shares, bd, tr, total, valid };
+  window._calcData = { shares, bd, tr, total, valid, net };
 
   const rs = document.getElementById('result-sec');
   const ra = document.getElementById('result-area');
   rs.style.display = 'block';
 
-  let html = `<div class="res-card">
-    <div class="res-head"><div class="res-ht">账单结算</div><div class="res-total">¥${total.toFixed(2)}</div></div>
-    <div class="res-body">
-      ${R.members.map((p,i) => `
-        <div class="res-row" onclick="showPersonalBill('${p}')">
-          <div class="res-top">
-            <div class="res-left">
-              <div class="res-av" style="background:${gc(i)}22;color:${gc(i)}">${gi(p)}</div>
-              <span class="res-name">${p}${p===R.me?' (我)':''}</span>
-            </div>
-            <span class="res-amt" style="color:${gc(i)}">¥${(shares[p]||0).toFixed(2)}</span>
-          </div>
-          <div class="res-bd">${(bd[p]||[]).map(b=>`<span class="bd-item">${b.name} ¥${b.amt.toFixed(2)}</span>`).join('')}</div>
-          <div class="res-hint">点击查看个人账单 →</div>
-        </div>`).join('')}
-    </div>
+  renderResultTabs('all');
+  setTimeout(() => rs.scrollIntoView({ behavior:'smooth', block:'start' }), 100);
+}
+
+// ── RESULT TABS ──
+function renderResultTabs(activeTab) {
+  const data = window._calcData;
+  if (!data) return;
+  const { shares, bd, tr, total, valid, net } = data;
+  const ra = document.getElementById('result-area');
+
+  const tabBar = `<div style="display:flex;gap:6px;margin-bottom:12px">
+    ${['all','paid','spent'].map(t => `
+      <button onclick="renderResultTabs('${t}')"
+        style="flex:1;padding:9px 0;border-radius:10px;border:1.5px solid ${t===activeTab?'var(--accent)':'var(--border)'};
+               background:${t===activeTab?'rgba(240,224,64,.1)':'var(--card2)'};
+               color:${t===activeTab?'var(--accent)':'var(--muted)'};
+               font-size:12px;font-weight:700;cursor:pointer;font-family:Syne,sans-serif">
+        ${{all:'全部',paid:'我付的',spent:'我花的'}[t]}
+      </button>`).join('')}
   </div>`;
 
-  if (tr.length) {
-    html += `<div class="tr-card"><div class="tr-title">最简转账路径</div>
-      ${tr.map(t=>`<div class="tr-row"><span>${t.from}</span><span class="tr-arr">→</span><span>${t.to}</span><span class="tr-amt">¥${t.amount.toFixed(2)}</span></div>`).join('')}
+  let html = tabBar;
+
+  if (activeTab === 'all') {
+    // 全部账单视图
+    html += `<div class="res-card">
+      <div class="res-head"><div class="res-ht">账单结算</div><div class="res-total">¥${total.toFixed(2)}</div></div>
+      <div class="res-body">
+        ${R.members.map((p,i) => `
+          <div class="res-row" onclick="showPersonalBill('${p}')">
+            <div class="res-top">
+              <div class="res-left">
+                <div class="res-av" style="background:${gc(i)}22;color:${gc(i)}">${gi(p)}</div>
+                <span class="res-name">${p}${p===R.me?' (我)':''}</span>
+              </div>
+              <span class="res-amt" style="color:${gc(i)}">¥${(shares[p]||0).toFixed(2)}</span>
+            </div>
+            <div class="res-bd">${(bd[p]||[]).map(b=>`<span class="bd-item">${b.name} ¥${b.amt.toFixed(2)}</span>`).join('')}</div>
+            <div class="res-hint">点击查看个人账单 →</div>
+          </div>`).join('')}
+      </div>
     </div>`;
-  } else {
-    html += `<div class="tr-card" style="text-align:center;color:var(--green);font-size:15px;padding:20px">✅ 各自付清，不用转账</div>`;
+
+  } else if (activeTab === 'paid') {
+    // 我付的视图
+    const myPaidItems = valid.filter(it => it.payer === R.me);
+    const myPaidTotal = myPaidItems.reduce((s, it) => s + parseFloat(it.price), 0);
+    const myReceive = tr.filter(t => t.to === R.me);
+    const myOwe = tr.filter(t => t.from === R.me);
+
+    html += `<div class="res-card">
+      <div class="res-head">
+        <div class="res-ht">我付的账单</div>
+        <div class="res-total">¥${myPaidTotal.toFixed(2)}</div>
+      </div>
+      <div class="res-body">
+        ${myPaidItems.length ? myPaidItems.map(it => {
+          const ps = it.participants.filter(p => R.members.includes(p));
+          const eaters = ps.length > 0 ? ps : R.members;
+          const share = parseFloat(it.price) / eaters.length;
+          return `<div class="res-row" style="cursor:default">
+            <div class="res-top">
+              <span style="font-size:14px">${it.name}</span>
+              <span style="font-family:Syne,sans-serif;font-weight:700;color:var(--accent)">¥${parseFloat(it.price).toFixed(2)}</span>
+            </div>
+            <div class="res-bd">${eaters.map(p=>`<span class="bd-item">${p} ¥${share.toFixed(2)}</span>`).join('')}</div>
+          </div>`;
+        }).join('') : `<div class="empty" style="padding:20px 0"><div class="empty-icon">💸</div>还没有你付款的账单</div>`}
+      </div>
+    </div>`;
+
+    if (myReceive.length) {
+      html += `<div class="tr-card"><div class="tr-title">等待转账给我</div>
+        ${myReceive.map(t=>`<div class="tr-row"><span>${t.from}</span><span class="tr-arr">→</span><span>我</span><span class="tr-amt">¥${t.amount.toFixed(2)}</span></div>`).join('')}
+      </div>`;
+    }
+    if (myOwe.length) {
+      html += `<div class="tr-card"><div class="tr-title">我需要转账</div>
+        ${myOwe.map(t=>`<div class="tr-row"><span>我</span><span class="tr-arr">→</span><span>${t.to}</span><span class="tr-amt" style="color:var(--accent2)">¥${t.amount.toFixed(2)}</span></div>`).join('')}
+      </div>`;
+    }
+
+  } else if (activeTab === 'spent') {
+    // 我花的视图
+    const myItems = bd[R.me] || [];
+    // 合并同名
+    const merged = {};
+    myItems.forEach(b => {
+      if (merged[b.name]) { merged[b.name].amt += b.amt; merged[b.name].count++; }
+      else { merged[b.name] = { amt: b.amt, count: 1 }; }
+    });
+    const myTotal = shares[R.me] || 0;
+    const myOwe2 = tr.filter(t => t.from === R.me);
+    const myReceive2 = tr.filter(t => t.to === R.me);
+
+    html += `<div class="res-card">
+      <div class="res-head">
+        <div class="res-ht">我花的</div>
+        <div class="res-total">¥${myTotal.toFixed(2)}</div>
+      </div>
+      <div class="res-body">
+        ${Object.entries(merged).length ? Object.entries(merged).map(([name, v]) => `
+          <div class="res-row" style="cursor:default">
+            <div class="res-top">
+              <div>
+                <span style="font-size:14px">${name}</span>
+                ${v.count > 1 ? `<span style="font-size:11px;color:var(--muted);margin-left:6px">×${v.count}笔</span>` : ''}
+              </div>
+              <span style="font-family:Syne,sans-serif;font-weight:700;color:var(--accent)">¥${v.amt.toFixed(2)}</span>
+            </div>
+          </div>`).join('') : `<div class="empty" style="padding:20px 0"><div class="empty-icon">🍽️</div>没有你参与的消费</div>`}
+      </div>
+    </div>`;
+
+    if (myOwe2.length) {
+      html += `<div class="tr-card"><div class="tr-title">我需要转账</div>
+        ${myOwe2.map(t=>`<div class="tr-row"><span>我</span><span class="tr-arr">→</span><span>${t.to}</span><span class="tr-amt" style="color:var(--accent2)">¥${t.amount.toFixed(2)}</span></div>`).join('')}
+      </div>`;
+    }
+    if (myReceive2.length) {
+      html += `<div class="tr-card"><div class="tr-title">等待转账给我</div>
+        ${myReceive2.map(t=>`<div class="tr-row"><span>${t.from}</span><span class="tr-arr">→</span><span>我</span><span class="tr-amt">¥${t.amount.toFixed(2)}</span></div>`).join('')}
+      </div>`;
+    }
   }
 
-  html += `<div class="shot">
-    <div class="shot-top"><div class="shot-tl">📸 长按截图发群里</div><div class="shot-tr">AAnow</div></div>
-    <div class="shot-body">
-      ${valid.map(it=>`<div class="shot-row"><span>${it.name}</span><span>¥${parseFloat(it.price).toFixed(2)} · ${it.participants.length}人</span></div>`).join('')}
-      <div class="div"></div>
-      ${R.members.map((p,i)=>`<div class="shot-row hi"><span>${p}</span><span style="color:${gc(i)}">¥${(shares[p]||0).toFixed(2)}</span></div>`).join('')}
-      ${tr.length?'<div class="div"></div>'+tr.map(t=>`<div class="shot-row tx"><span>${t.from} → ${t.to}</span><span>¥${t.amount.toFixed(2)}</span></div>`).join(''):''}
-    </div>
-    <div class="shot-foot">AAnow · 一键分账</div>
-  </div>`;
+  // 截图卡片只在全部视图显示
+  if (activeTab === 'all') {
+    html += `<div class="shot">
+      <div class="shot-top"><div class="shot-tl">📸 长按截图发群里</div><div class="shot-tr">AAnow</div></div>
+      <div class="shot-body">
+        ${valid.map(it=>`<div class="shot-row"><span>${it.name}</span><span>¥${parseFloat(it.price).toFixed(2)} · ${it.participants.length}人</span></div>`).join('')}
+        <div class="div"></div>
+        ${R.members.map((p,i)=>`<div class="shot-row hi"><span>${p}</span><span style="color:${gc(i)}">¥${(shares[p]||0).toFixed(2)}</span></div>`).join('')}
+        ${tr.length?'<div class="div"></div>'+tr.map(t=>`<div class="shot-row tx"><span>${t.from} → ${t.to}</span><span>¥${t.amount.toFixed(2)}</span></div>`).join(''):''}
+      </div>
+      <div class="shot-foot">AAnow · 一键分账</div>
+    </div>`;
+  }
 
   ra.innerHTML = html;
-  setTimeout(() => rs.scrollIntoView({ behavior:'smooth', block:'start' }), 100);
+}
+
+
+
 }
 
 // ── PERSONAL BILL ──
@@ -818,7 +927,7 @@ function showPersonalBill(person) {
         </div>`).join('')}` : ''}
     </div>
     <div class="pb-footer">
-      <button class="back-btn" onclick="calculate()">← 返回总账单</button>
+      <button class="back-btn" onclick="renderResultTabs('all')">← 返回总账单</button>
     </div>
   </div>`;
 

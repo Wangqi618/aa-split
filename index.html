@@ -551,11 +551,16 @@ async function loadItems() {
 function setupRealtime() {
   if (state.channel) sb.removeChannel(state.channel);
   state.channel = sb.channel('room-' + state.roomId)
-    .on('postgres_changes', { event: '*', schema: 'public', table: 'members', filter: `room_id=eq.${state.roomId}` },
-      () => loadMembers())
-    .on('postgres_changes', { event: '*', schema: 'public', table: 'items', filter: `room_id=eq.${state.roomId}` },
-      () => loadItems())
-    .subscribe();
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'members', filter: 'room_id=eq.' + state.roomId },
+      async () => { await loadMembers(); })
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'items', filter: 'room_id=eq.' + state.roomId },
+      async () => { await loadItems(); })
+    .subscribe(async (status) => {
+      if (status === 'SUBSCRIBED') {
+        await loadMembers();
+        await loadItems();
+      }
+    });
 }
 
 // ── RENDER MEMBERS ──
@@ -572,17 +577,15 @@ function renderMembers() {
 
 // ── ADD ITEM ──
 async function addItem() {
-  if (state.members.length < 2) { showToast('等更多人加入再记账'); return; }
-  // insert a new item with defaults
+  const members = state.members.length > 0 ? state.members : [state.myName];
   const { data, error } = await sb.from('items').insert({
     room_id: state.roomId,
     name: '',
     price: 0,
     payer: state.myName,
-    participants: [...state.members],
+    participants: members,
   }).select().single();
   if (error) { showToast('添加失败'); console.error(error); return; }
-  // local update will come via realtime, but also add locally for instant feedback
   state.items.push(data);
   renderItems();
   setTimeout(() => {

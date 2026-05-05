@@ -41,7 +41,6 @@ body { background:var(--bg); color:var(--text); font-family:'Noto Sans SC',sans-
 .btn.sec { background:var(--card2); color:var(--text); border:1.5px solid var(--border); }
 .btn.full { width:100%; padding:16px; font-size:16px; border-radius:var(--radius); }
 .btn.sm { padding:8px 14px; font-size:13px; border-radius:10px; }
-.btn.danger { background:#3a1a1a; color:var(--accent2); border:1.5px solid #5a2a2a; }
 
 .card { background:var(--card); border:1.5px solid var(--border); border-radius:var(--radius); padding:20px; margin-bottom:12px; }
 .card h3 { font-family:'Syne',sans-serif; font-size:14px; font-weight:700; margin-bottom:14px; color:var(--accent); }
@@ -65,13 +64,21 @@ body { background:var(--bg); color:var(--text); font-family:'Noto Sans SC',sans-
 .chips { display:flex; flex-wrap:wrap; gap:6px; margin-bottom:8px; }
 .chip { display:flex; align-items:center; gap:5px; background:var(--card); border:1.5px solid var(--border); border-radius:100px; padding:5px 10px 5px 8px; font-size:13px; animation:popIn .2s cubic-bezier(.34,1.56,.64,1); }
 .chip.me { border-color:var(--accent); background:rgba(240,224,64,.06); }
-.chip.host-chip { border-color:rgba(255,107,53,.4); }
+.chip.hostchip { border-color:rgba(255,107,53,.4); }
 .av { width:20px; height:20px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:11px; font-weight:700; flex-shrink:0; }
-.chip-rm { width:16px; height:16px; border-radius:50%; background:var(--border); border:none; color:var(--muted); font-size:11px; cursor:pointer; display:flex; align-items:center; justify-content:center; margin-left:2px; flex-shrink:0; transition:all .12s; }
+.chip-rm { width:16px; height:16px; border-radius:50%; background:var(--border); border:none; color:var(--muted); font-size:11px; cursor:pointer; display:flex; align-items:center; justify-content:center; margin-left:2px; flex-shrink:0; }
 .chip-rm:active { background:var(--accent2); color:#fff; }
 .add-row { display:flex; gap:8px; }
 .toggle-manual { font-size:12px; color:var(--muted); background:none; border:none; cursor:pointer; margin-top:5px; font-family:'Noto Sans SC',sans-serif; }
 @keyframes popIn { from{opacity:0;transform:scale(.9) translateY(4px)} to{opacity:1;transform:scale(1) translateY(0)} }
+
+/* NEW MEMBER NOTIFY BANNER */
+.notify-banner { background:rgba(96,165,250,.08); border:1.5px solid rgba(96,165,250,.25); border-radius:12px; padding:12px 14px; margin-bottom:10px; display:none; }
+.notify-banner p { font-size:13px; color:#60a5fa; margin-bottom:8px; }
+.notify-btns { display:flex; gap:8px; }
+.notify-btns button { flex:1; padding:8px; border-radius:10px; border:none; font-size:13px; cursor:pointer; font-family:'Noto Sans SC',sans-serif; font-weight:600; }
+.notify-yes { background:var(--accent); color:#000; }
+.notify-no { background:var(--card2); color:var(--muted); border:1.5px solid var(--border) !important; }
 
 .ic { background:var(--card); border:1.5px solid var(--border); border-radius:var(--radius); padding:14px; margin-bottom:10px; position:relative; }
 .ic.mine { border-color:rgba(240,224,64,.22); }
@@ -100,12 +107,38 @@ body { background:var(--bg); color:var(--text); font-family:'Noto Sans SC',sans-
 
 .div { height:1px; background:var(--border); margin:10px 0; }
 
+/* PERSONAL BILL MODAL */
+.modal-bg { display:none; position:fixed; inset:0; background:rgba(0,0,0,.8); z-index:200; align-items:flex-end; }
+.modal-bg.show { display:flex; }
+.modal { background:var(--card); border-radius:20px 20px 0 0; padding:20px; width:100%; max-height:80vh; overflow-y:auto; }
+.modal-title { font-family:'Syne',sans-serif; font-size:16px; font-weight:800; margin-bottom:4px; }
+.modal-sub { font-size:12px; color:var(--muted); margin-bottom:16px; }
+.modal-person-btn { padding:10px 14px; background:var(--card2); border:1.5px solid var(--border); border-radius:12px; color:var(--text); font-size:14px; cursor:pointer; display:flex; align-items:center; gap:10px; margin-bottom:8px; width:100%; text-align:left; font-family:'Noto Sans SC',sans-serif; }
+.modal-person-btn:active { border-color:var(--accent); }
+.modal-person-btn .av { width:28px; height:28px; font-size:13px; }
+.modal-close { width:100%; padding:12px; background:none; border:1.5px solid var(--border); border-radius:12px; color:var(--muted); font-size:14px; cursor:pointer; margin-top:4px; font-family:'Noto Sans SC',sans-serif; }
+
+/* PERSONAL BILL VIEW */
+.personal-bill { background:var(--card); border:1.5px solid var(--accent); border-radius:var(--radius); overflow:hidden; margin-bottom:12px; }
+.pb-head { background:var(--accent); padding:14px 18px; }
+.pb-name { font-family:'Syne',sans-serif; font-size:20px; font-weight:800; color:#000; }
+.pb-total-label { font-size:11px; color:#000; opacity:.6; margin-top:2px; }
+.pb-total { font-family:'Syne',sans-serif; font-size:28px; font-weight:800; color:#000; }
+.pb-body { padding:12px 18px; }
+.pb-row { display:flex; justify-content:space-between; align-items:center; padding:8px 0; border-bottom:1px solid var(--border); font-size:14px; }
+.pb-row:last-child { border-bottom:none; }
+.pb-item-name { color:var(--text); }
+.pb-item-amt { font-family:'Syne',sans-serif; font-weight:700; color:var(--accent); }
+.pb-note { font-size:11px; color:var(--muted); margin-top:2px; }
+.pb-footer { padding:12px 18px; border-top:1px solid var(--border); }
+.back-btn { font-size:13px; color:var(--muted); background:none; border:none; cursor:pointer; font-family:'Noto Sans SC',sans-serif; }
+
 .res-card { background:var(--card); border:1.5px solid var(--border); border-radius:var(--radius); overflow:hidden; margin-bottom:12px; }
 .res-head { background:var(--accent); padding:14px 18px; display:flex; align-items:center; justify-content:space-between; }
 .res-ht { font-family:'Syne',sans-serif; font-size:15px; font-weight:800; color:#000; }
 .res-total { font-family:'Syne',sans-serif; font-size:22px; font-weight:800; color:#000; }
 .res-body { padding:4px 18px 8px; }
-.res-row { padding:11px 0; border-bottom:1px solid var(--border); }
+.res-row { padding:11px 0; border-bottom:1px solid var(--border); cursor:pointer; }
 .res-row:last-child { border-bottom:none; }
 .res-top { display:flex; align-items:center; justify-content:space-between; margin-bottom:5px; }
 .res-left { display:flex; align-items:center; gap:10px; }
@@ -114,6 +147,7 @@ body { background:var(--bg); color:var(--text); font-family:'Noto Sans SC',sans-
 .res-amt { font-family:'Syne',sans-serif; font-size:18px; font-weight:700; }
 .res-bd { padding-left:40px; display:flex; flex-wrap:wrap; gap:5px; }
 .bd-item { font-size:11px; color:var(--muted); background:var(--card2); border-radius:6px; padding:3px 8px; }
+.res-hint { font-size:10px; color:var(--muted); padding-left:40px; margin-top:3px; }
 
 .tr-card { background:var(--card); border:1.5px solid var(--border); border-radius:var(--radius); padding:14px 18px; margin-bottom:12px; }
 .tr-title { font-family:'Syne',sans-serif; font-size:10px; letter-spacing:2px; color:var(--muted); text-transform:uppercase; margin-bottom:10px; }
@@ -194,6 +228,16 @@ body { background:var(--bg); color:var(--text); font-family:'Noto Sans SC',sans-
   <div class="section" style="margin-top:12px">
     <div class="sec-title">在场的人 <span id="m-badge"></span></div>
     <div class="chips" id="m-chips"></div>
+
+    <!-- 新人加入提示 -->
+    <div class="notify-banner" id="notify-banner">
+      <p id="notify-text"></p>
+      <div class="notify-btns">
+        <button class="notify-yes" onclick="addNewMemberToAllItems()">加入所有账单</button>
+        <button class="notify-no" onclick="dismissNotify()">不用了</button>
+      </div>
+    </div>
+
     <div class="add-row" id="manual-row" style="display:none;margin-bottom:6px">
       <input class="inp" id="manual-inp" placeholder="没来的人…" maxlength="8" style="flex:1">
       <button class="btn sec sm" onclick="addManual()">加入</button>
@@ -219,6 +263,16 @@ body { background:var(--bg); color:var(--text); font-family:'Noto Sans SC',sans-
   </div>
 </div>
 
+<!-- PERSONAL BILL MODAL -->
+<div class="modal-bg" id="modal-bg">
+  <div class="modal">
+    <div class="modal-title">查看个人账单</div>
+    <div class="modal-sub">选择要查看的人</div>
+    <div id="modal-persons"></div>
+    <button class="modal-close" onclick="closeModal()">取消</button>
+  </div>
+</div>
+
 <div class="toast" id="toast"></div>
 
 <script>
@@ -232,6 +286,8 @@ const gi = n => n ? n[0].toUpperCase() : '?';
 
 let R = { id:null, me:null, host:null, members:[], items:[], ch:null };
 const editing = new Set();
+let lastMemberCount = 0;
+let pendingNewMember = null; // 待处理的新成员
 
 // ── TOAST ──
 function toast(msg) {
@@ -240,13 +296,12 @@ function toast(msg) {
   setTimeout(() => t.classList.remove('show'), 2200);
 }
 
-// ── PAGE ──
 function showPage(id) {
   document.querySelectorAll('.page').forEach(p => p.classList.toggle('active', p.id === id));
   window.scrollTo(0, 0);
 }
 
-// ── TITLE: only update if count changed ──
+// ── TITLE ──
 let lastTitleCount = 2;
 function updateTitle() {
   const n = Math.max(2, R.members.length);
@@ -254,7 +309,7 @@ function updateTitle() {
   const el = document.getElementById('main-title');
   let html = '';
   for (let i = 0; i < n; i++) {
-    html += `<span class="a${i >= lastTitleCount ? ' pop' : ''}">${'A'}</span>`;
+    html += `<span class="a${i >= lastTitleCount ? ' pop' : ''}">A</span>`;
   }
   html += '<span class="now">now</span>';
   el.innerHTML = html;
@@ -291,7 +346,6 @@ async function rejoin() {
   await enterRoom(code, name, data.host);
 }
 
-// ── GEN CODE ──
 function genCode() { return Math.random().toString(36).slice(2, 8).toUpperCase(); }
 function roomFromURL() { return new URLSearchParams(location.search).get('room'); }
 
@@ -312,26 +366,16 @@ async function joinRoom() {
   if (code.length !== 6) { toast('请输入6位房间码'); return; }
   const { data } = await sb.from('rooms').select('id,host').eq('id', code).single();
   if (!data) { toast('房间不存在，检查一下码'); return; }
-
-  // 检查名字是否已存在
-  const { data: existing } = await sb.from('members').select('name').eq('room_id', code).eq('name', name).single();
-  if (existing) {
-    // 名字已存在，直接进入（回来了）
-    await enterRoom(code, name, data.host);
-    return;
-  }
   await enterRoom(code, name, data.host);
 }
 
 async function enterRoom(code, name, host) {
   R.id = code; R.me = name; R.host = host;
-
-  // 插入成员，名字在同一房间唯一
+  // 检查名字是否已存在，不存在才插入
   const { data: existing } = await sb.from('members').select('id').eq('room_id', code).eq('name', name).single();
   if (!existing) {
     await sb.from('members').insert({ room_id: code, name });
   }
-
   await loadMembers();
   await loadItems();
   setupRT();
@@ -341,16 +385,29 @@ async function enterRoom(code, name, host) {
   document.getElementById('rc').textContent = code;
   document.getElementById('ru').textContent = name + (name === host ? ' 👑' : '');
   saveSession(code, name);
-  lastTitleCount = 2; // reset so title updates
+  lastTitleCount = 2;
+  lastMemberCount = R.members.length;
   showPage('pg-room');
 }
 
-// ── LOAD (no full re-render on members, only diff) ──
+// ── LOAD ──
 async function loadMembers() {
   const { data } = await sb.from('members').select('name').eq('room_id', R.id).order('joined_at');
   const newMembers = data ? data.map(m => m.name) : [];
-  // Only update if changed
   if (JSON.stringify(newMembers) === JSON.stringify(R.members)) return;
+
+  // 检测新加入的人（不是自己）
+  if (R.members.length > 0) {
+    const added = newMembers.filter(m => !R.members.includes(m) && m !== R.me);
+    if (added.length > 0 && R.me === R.host) {
+      // 只有房主看到提示
+      pendingNewMember = added[added.length - 1];
+      const banner = document.getElementById('notify-banner');
+      document.getElementById('notify-text').textContent = `"${pendingNewMember}" 刚加入，要把他/她加入所有现有账单吗？`;
+      banner.style.display = 'block';
+    }
+  }
+
   R.members = newMembers;
   renderMembers();
   updateTitle();
@@ -372,6 +429,27 @@ async function loadItems() {
   renderItems();
 }
 
+// ── NEW MEMBER NOTIFY ──
+async function addNewMemberToAllItems() {
+  if (!pendingNewMember) return;
+  const name = pendingNewMember;
+  for (const it of R.items) {
+    if (!it.participants.includes(name)) {
+      it.participants.push(name);
+      editing.add(it.id);
+      await sb.from('items').update({ participants: it.participants }).eq('id', it.id);
+      setTimeout(() => editing.delete(it.id), 800);
+    }
+  }
+  renderItems();
+  dismissNotify();
+  toast(`已把 ${name} 加入所有账单 ✅`);
+}
+function dismissNotify() {
+  pendingNewMember = null;
+  document.getElementById('notify-banner').style.display = 'none';
+}
+
 // ── REALTIME ──
 function setupRT() {
   if (R.ch) sb.removeChannel(R.ch);
@@ -384,7 +462,7 @@ function setupRT() {
       p => {
         if (!R.items.find(i => i.id === p.new.id)) {
           R.items.push(p.new);
-          appendItemCard(p.new); // only append, don't re-render all
+          appendItemCard(p.new);
           updateItemBadge();
         }
       })
@@ -400,10 +478,7 @@ function setupRT() {
       p => {
         if (editing.has(p.new.id)) return;
         const idx = R.items.findIndex(i => i.id === p.new.id);
-        if (idx >= 0) {
-          R.items[idx] = p.new;
-          updateItemCard(p.new); // only update that card
-        }
+        if (idx >= 0) { R.items[idx] = p.new; updateItemCard(p.new); }
       })
     .subscribe();
 }
@@ -421,7 +496,6 @@ async function addManual() {
   const name = inp.value.trim();
   if (!name) return;
   if (R.members.includes(name)) { toast(`"${name}" 已在列表`); return; }
-  // Check DB too
   const { data: ex } = await sb.from('members').select('id').eq('room_id', R.id).eq('name', name).single();
   if (ex) { toast(`"${name}" 已在列表`); return; }
   await sb.from('members').insert({ room_id: R.id, name });
@@ -430,7 +504,6 @@ async function addManual() {
   toast(`已加入 ${name} 👤`);
 }
 
-// ── REMOVE MEMBER ──
 async function removeMember(name) {
   const isHost = R.me === R.host;
   const isMe = name === R.me;
@@ -444,13 +517,13 @@ async function removeMember(name) {
   if (isMe) leaveRoom();
 }
 
-// ── RENDER MEMBERS (full, but only called on member change) ──
+// ── RENDER MEMBERS ──
 function renderMembers() {
   const isHost = R.me === R.host;
   document.getElementById('m-chips').innerHTML = R.members.map((m, i) => {
     const canRemove = isHost || m === R.me;
     const isH = m === R.host;
-    return `<div class="chip ${m===R.me?'me':''} ${isH&&m!==R.me?'host-chip':''}">
+    return `<div class="chip ${m===R.me?'me':''} ${isH&&m!==R.me?'hostchip':''}">
       <div class="av" style="background:${gc(i)}22;color:${gc(i)}">${gi(m)}</div>
       <span>${m}${m===R.me?' (我)':''}${isH?' 👑':''}</span>
       ${canRemove ? `<button class="chip-rm" onclick="removeMember('${m}')">×</button>` : ''}
@@ -460,38 +533,40 @@ function renderMembers() {
   b.innerHTML = R.members.length ? `<span class="badge">${R.members.length}</span>` : '';
 }
 
-// ── BUILD ITEM HTML (shared by render + append) ──
+// ── BUILD ITEM HTML ──
+// 编辑权限由 creator 决定，不是 payer
 function buildItemHTML(it) {
-  const mine = it.payer === R.me;
+  const creator = it.creator || it.payer; // 兼容旧数据
+  const isMine = creator === R.me;
   const isHost = R.me === R.host;
-  const canDelete = mine || isHost;
-  return `<div class="ic ${mine?'mine':''}" data-ic="${it.id}">
+  const canDelete = isMine || isHost;
+  return `<div class="ic ${isMine?'mine':''}" data-ic="${it.id}">
     ${canDelete ? `<button class="ic-rm" onclick="deleteItem('${it.id}')">×</button>` : ''}
     <div class="ic-who">由 <b>${it.payer==='each'?'大家':it.payer}</b> 付款</div>
     <div class="ic-row">
       <div style="flex:1;display:flex;flex-direction:column;gap:5px">
         <div class="fl">菜名 / 饮料</div>
-        <input class="inp${!mine?' ro':''}" placeholder="${mine?'奶茶、烤鱼…':'—'}"
+        <input class="inp${!isMine?' ro':''}" placeholder="${isMine?'奶茶、烤鱼…':'—'}"
           value="${it.name||''}"
-          ${mine ? `onfocus="onFocus('${it.id}')" oninput="onNameIn('${it.id}',this.value)" onblur="onNameBlur('${it.id}')"` : 'readonly'}
-          style="padding-right:${mine?'32px':'14px'}">
+          ${isMine ? `onfocus="onFocus('${it.id}')" oninput="onNameIn('${it.id}',this.value)" onblur="onNameBlur('${it.id}')"` : 'readonly'}
+          style="padding-right:${isMine?'32px':'14px'}">
       </div>
       <div style="display:flex;flex-direction:column;gap:5px">
         <div class="fl">价格</div>
         <div class="pw">
           <span class="px">¥</span>
-          <input class="inp${!mine?' ro':''}" type="text" inputmode="decimal" placeholder="0.00"
+          <input class="inp${!isMine?' ro':''}" type="text" inputmode="decimal" placeholder="0.00"
             value="${it.price||''}"
-            ${mine ? `onfocus="onFocus('${it.id}')" oninput="onPriceIn('${it.id}',this.value)" onblur="onPriceBlur('${it.id}')"` : 'readonly'}>
+            ${isMine ? `onfocus="onFocus('${it.id}')" oninput="onPriceIn('${it.id}',this.value)" onblur="onPriceBlur('${it.id}')"` : 'readonly'}>
         </div>
       </div>
     </div>
-    <div class="pill-lbl">谁吃/喝？${mine?`<button class="all-btn" onclick="selAll('${it.id}')">全选</button>`:''}</div>
+    <div class="pill-lbl">谁吃/喝？${isMine?`<button class="all-btn" onclick="selAll('${it.id}')">全选</button>`:''}</div>
     <div class="pill-row" data-eat="${it.id}">
-      ${R.members.map(p => `<div class="pe${it.participants.includes(p)?' on':''} ${!mine?'ro':''}"
-        ${mine?`onclick="toggleEater('${it.id}','${p}')"`:''}><div class="d"></div>${p}</div>`).join('')}
+      ${R.members.map(p => `<div class="pe${it.participants.includes(p)?' on':''} ${!isMine?'ro':''}"
+        ${isMine?`onclick="toggleEater('${it.id}','${p}')"`:''}><div class="d"></div>${p}</div>`).join('')}
     </div>
-    ${mine ? `
+    ${isMine ? `
       <div class="div" style="margin:10px 0 8px"></div>
       <div class="pill-lbl" style="margin-top:0;margin-bottom:6px">谁付了这笔？</div>
       <div class="pill-row" data-pay="${it.id}">
@@ -502,31 +577,25 @@ function buildItemHTML(it) {
   </div>`;
 }
 
-// ── RENDER ALL ITEMS (full, used on initial load) ──
 function renderItems() {
   const el = document.getElementById('items-list');
   updateItemBadge();
   if (!R.items.length) { el.innerHTML = `<div class="empty"><div class="empty-icon">🍽️</div>还没人记账</div>`; return; }
   el.innerHTML = R.items.map(it => buildItemHTML(it)).join('');
 }
-
-// ── APPEND ONE ITEM (no full re-render) ──
 function appendItemCard(it) {
   const el = document.getElementById('items-list');
   const empty = el.querySelector('.empty');
   if (empty) el.innerHTML = '';
   el.insertAdjacentHTML('beforeend', buildItemHTML(it));
 }
-
-// ── UPDATE ONE ITEM CARD (no full re-render) ──
 function updateItemCard(it) {
   const el = document.querySelector(`[data-ic="${it.id}"]`);
   if (!el) return;
-  const newEl = document.createElement('div');
-  newEl.innerHTML = buildItemHTML(it);
-  el.replaceWith(newEl.firstElementChild);
+  const tmp = document.createElement('div');
+  tmp.innerHTML = buildItemHTML(it);
+  el.replaceWith(tmp.firstElementChild);
 }
-
 function updateItemBadge() {
   const b = document.getElementById('i-badge');
   b.innerHTML = R.items.length ? `<span class="badge">${R.items.length}</span>` : '';
@@ -536,7 +605,9 @@ function updateItemBadge() {
 async function addItem() {
   const members = R.members.length > 0 ? R.members : [R.me];
   const { data, error } = await sb.from('items').insert({
-    room_id: R.id, name: '', price: 0, payer: R.me, participants: members
+    room_id: R.id, name: '', price: 0,
+    payer: R.me, creator: R.me, // creator 记录创建者，永不改变
+    participants: members
   }).select().single();
   if (error) { toast('添加失败，请重试'); return; }
   if (!R.items.find(i => i.id === data.id)) {
@@ -546,7 +617,7 @@ async function addItem() {
   }
   setTimeout(() => {
     const inputs = document.querySelectorAll('[data-ic] input');
-    if (inputs.length) inputs[inputs.length - 2].focus(); // name field of last card
+    if (inputs.length >= 2) inputs[inputs.length - 2].focus();
   }, 60);
 }
 
@@ -577,14 +648,15 @@ async function onPriceBlur(id) {
   await sb.from('items').update({ price }).eq('id', id);
 }
 
-// ── PILL ACTIONS ──
+// ── PILL ACTIONS (only creator can edit) ──
 function toggleEater(id, name) {
-  const it = R.items.find(i => i.id === id); if (!it || it.payer !== R.me) return;
+  const it = R.items.find(i => i.id === id); if (!it) return;
+  const creator = it.creator || it.payer;
+  if (creator !== R.me) return;
   const idx = it.participants.indexOf(name);
   if (idx >= 0) {
     if (it.participants.length === 1) { toast('至少留一个人'); return; }
     it.participants.splice(idx, 1);
-    if (it.payer === name) it.payer = 'each';
   } else { it.participants.push(name); }
   reRenderEaters(id); saveMeta(id);
 }
@@ -594,6 +666,7 @@ function selAll(id) {
 }
 function selPayer(id, name) {
   const it = R.items.find(i => i.id === id); if (!it) return;
+  // payer 可以改，不影响编辑权限（creator才决定谁能编辑）
   it.payer = it.payer === name ? 'each' : name;
   reRenderPayers(id); saveMeta(id);
 }
@@ -606,10 +679,11 @@ async function saveMeta(id) {
 function reRenderEaters(id) {
   const it = R.items.find(i => i.id === id); if (!it) return;
   const el = document.querySelector(`[data-eat="${id}"]`); if (!el) return;
-  const mine = it.payer === R.me;
+  const creator = it.creator || it.payer;
+  const isMine = creator === R.me;
   el.innerHTML = R.members.map(p =>
-    `<div class="pe${it.participants.includes(p)?' on':''} ${!mine?'ro':''}"
-      ${mine?`onclick="toggleEater('${id}','${p}')"`:''}><div class="d"></div>${p}</div>`).join('');
+    `<div class="pe${it.participants.includes(p)?' on':''} ${!isMine?'ro':''}"
+      ${isMine?`onclick="toggleEater('${id}','${p}')"`:''}><div class="d"></div>${p}</div>`).join('');
 }
 function reRenderPayers(id) {
   const it = R.items.find(i => i.id === id); if (!it) return;
@@ -646,14 +720,19 @@ function calculate() {
     d.amt -= amt; c.amt -= amt;
     if (d.amt < 0.005) di++; if (c.amt < 0.005) ci++;
   }
+
+  // Store for personal bill view
+  window._calcData = { shares, bd, tr, total, valid };
+
   const rs = document.getElementById('result-sec');
   const ra = document.getElementById('result-area');
   rs.style.display = 'block';
+
   let html = `<div class="res-card">
     <div class="res-head"><div class="res-ht">账单结算</div><div class="res-total">¥${total.toFixed(2)}</div></div>
     <div class="res-body">
       ${R.members.map((p,i) => `
-        <div class="res-row">
+        <div class="res-row" onclick="showPersonalBill('${p}')">
           <div class="res-top">
             <div class="res-left">
               <div class="res-av" style="background:${gc(i)}22;color:${gc(i)}">${gi(p)}</div>
@@ -662,9 +741,11 @@ function calculate() {
             <span class="res-amt" style="color:${gc(i)}">¥${(shares[p]||0).toFixed(2)}</span>
           </div>
           <div class="res-bd">${(bd[p]||[]).map(b=>`<span class="bd-item">${b.name} ¥${b.amt.toFixed(2)}</span>`).join('')}</div>
+          <div class="res-hint">点击查看个人账单 →</div>
         </div>`).join('')}
     </div>
   </div>`;
+
   if (tr.length) {
     html += `<div class="tr-card"><div class="tr-title">最简转账路径</div>
       ${tr.map(t=>`<div class="tr-row"><span>${t.from}</span><span class="tr-arr">→</span><span>${t.to}</span><span class="tr-amt">¥${t.amount.toFixed(2)}</span></div>`).join('')}
@@ -672,6 +753,7 @@ function calculate() {
   } else {
     html += `<div class="tr-card" style="text-align:center;color:var(--green);font-size:15px;padding:20px">✅ 各自付清，不用转账</div>`;
   }
+
   html += `<div class="shot">
     <div class="shot-top"><div class="shot-tl">📸 长按截图发群里</div><div class="shot-tr">AAnow</div></div>
     <div class="shot-body">
@@ -682,8 +764,69 @@ function calculate() {
     </div>
     <div class="shot-foot">AAnow · 一键分账</div>
   </div>`;
+
   ra.innerHTML = html;
   setTimeout(() => rs.scrollIntoView({ behavior:'smooth', block:'start' }), 100);
+}
+
+// ── PERSONAL BILL ──
+function showPersonalBill(person) {
+  const data = window._calcData;
+  if (!data) return;
+  const { bd, shares, tr } = data;
+  const items = bd[person] || [];
+
+  // 合并同名账单
+  const merged = {};
+  items.forEach(b => {
+    if (merged[b.name]) { merged[b.name].amt += b.amt; merged[b.name].count++; }
+    else { merged[b.name] = { amt: b.amt, count: 1 }; }
+  });
+
+  const pIdx = R.members.indexOf(person);
+  const color = gc(pIdx >= 0 ? pIdx : 0);
+
+  // 找转账信息
+  const owes = tr.filter(t => t.from === person);
+  const receives = tr.filter(t => t.to === person);
+
+  const ra = document.getElementById('result-area');
+  ra.innerHTML = `<div class="personal-bill">
+    <div class="pb-head">
+      <div class="pb-name">${person}${person===R.me?' (我)':''} 的账单</div>
+      <div class="pb-total-label">本次消费合计</div>
+      <div class="pb-total" style="color:#000">¥${(shares[person]||0).toFixed(2)}</div>
+    </div>
+    <div class="pb-body">
+      ${Object.entries(merged).map(([name, v]) => `
+        <div class="pb-row">
+          <div>
+            <div class="pb-item-name">${name}</div>
+            ${v.count > 1 ? `<div class="pb-note">共${v.count}笔合并</div>` : ''}
+          </div>
+          <div class="pb-item-amt">¥${v.amt.toFixed(2)}</div>
+        </div>`).join('')}
+      ${owes.length ? `<div class="div"></div>
+        ${owes.map(t=>`<div class="pb-row">
+          <div class="pb-item-name" style="color:var(--accent2)">需转账给 ${t.to}</div>
+          <div class="pb-item-amt" style="color:var(--accent2)">¥${t.amount.toFixed(2)}</div>
+        </div>`).join('')}` : ''}
+      ${receives.length ? `<div class="div"></div>
+        ${receives.map(t=>`<div class="pb-row">
+          <div class="pb-item-name" style="color:var(--green)">等待 ${t.from} 转账</div>
+          <div class="pb-item-amt" style="color:var(--green)">¥${t.amount.toFixed(2)}</div>
+        </div>`).join('')}` : ''}
+    </div>
+    <div class="pb-footer">
+      <button class="back-btn" onclick="calculate()">← 返回总账单</button>
+    </div>
+  </div>`;
+
+  document.getElementById('result-sec').scrollIntoView({ behavior:'smooth', block:'start' });
+}
+
+function closeModal() {
+  document.getElementById('modal-bg').classList.remove('show');
 }
 
 // ── COPY / LEAVE ──
@@ -695,20 +838,20 @@ function copyLink() {
 function leaveRoom() {
   if (R.ch) sb.removeChannel(R.ch);
   R = { id:null, me:null, host:null, members:[], items:[], ch:null };
-  editing.clear(); lastTitleCount = 2;
+  editing.clear(); lastTitleCount = 2; lastMemberCount = 0; pendingNewMember = null;
   const el = document.getElementById('main-title');
   el.innerHTML = '<span class="a">A</span><span class="a">A</span><span class="now">now</span>';
   const u = new URL(location.href);
   u.searchParams.delete('room');
   history.replaceState({}, '', u);
   document.getElementById('result-sec').style.display = 'none';
+  document.getElementById('notify-banner').style.display = 'none';
   showPage('pg-land');
   showSessionBanner();
 }
 
 // ── INIT ──
 window.addEventListener('load', () => {
-  // Rooms table needs host column — add it via SQL if missing
   const code = roomFromURL();
   const { name } = loadSession();
   if (code) {
